@@ -96,8 +96,8 @@ retention policy (Phase 1.5) must cover the Customer master too.
 
 ## 6. V1 scope boundaries
 
-- **Channels:** WooCommerce only (Phase 6). Amazon and Walmart classification
-  rules are already fixed by INV-5 but their adapters arrive in Phase 8.
+- **Channels:** WooCommerce (Phase 13), Amazon (Phase 15), Walmart (Phase 16)
+  — all live through the one shared pipeline; classification rules per INV-5.
 - **Transport:** manual/operator-triggered import runs and manual replay.
   A scheduled polling job is **not** implied by this — scheduled jobs of any
   kind require their own explicit approval (see ERP-INVARIANTS out-of-scope

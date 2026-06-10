@@ -118,7 +118,9 @@ manual replay) must not duplicate any record or effect.
 These are not invariants; they are reminders that the following do **not** exist in
 V1 and must not be built opportunistically:
 
-- Payment/settlement reconciliation (needs real settlement data)
+- Settlement GL postings (Payment Entries / Journal Entries from settlement
+  files) — needs accounting policy. Read-only Amazon settlement *matching*
+  exists (Phase 27) and writes nothing; Walmart/Klarna formats need real files
 - Custom frontend pages (standard reports/workspaces are configuration,
   not pages)
 

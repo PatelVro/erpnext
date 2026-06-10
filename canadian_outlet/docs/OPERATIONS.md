@@ -25,7 +25,7 @@ runbook and the invariants disagree, the invariants win.
    Item. Unmapped listings do not import — they become Integration Exceptions
    (INV-4). That is the system working, not failing.
 
-## 2. Importing orders
+## 2. Importing orders (daily scheduled sync once enabled, plus operator-triggered runs)
 
 A daily scheduled sync (Phase 24) imports the last 2 days from every ENABLED
 channel — it no-ops entirely while `imports_enabled` is off. Manual runs for
@@ -80,6 +80,18 @@ Sales Order (draft, SELF) → human reviews → human submits SO
 `canadian_outlet.co_shipping.shipstation.import_shipstation_shipments(channel, ship_date_start=...)`
 records Shipment Status Events. A "shipped" event is informational only — it
 never submits anything and never moves stock (docs/STOCK-FLOW.md §4).
+
+## 5A. Reports, workspace, settlement
+
+- **Canadian Outlet workspace** (desk): shortcuts to the triage queues and the
+  reports below.
+- Reports: *Integration Exception Aging* (work oldest first), *Channel Sales
+  Summary*, *Channel Listing Health* (fix inactive/disabled mappings before
+  they become exceptions), *Reorder Status* (items below their human-set
+  reorder levels — purchasing stays a human decision).
+- **Amazon settlement check** (read-only, writes nothing):
+  `canadian_outlet.co_billing.settlement.reconcile_amazon_settlement(channel, file_content)`
+  — review Unmatched rows; GL posting decisions stay human.
 
 ## 6. Retention purge
 

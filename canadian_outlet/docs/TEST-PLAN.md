@@ -101,6 +101,22 @@ IDs are stable and referenced from code review.
 | T-CFG-1 | Missing required config key raises a clear error naming the key; no silent default | CONFIGURATION.md §2 |
 | T-CFG-2 | Secrets never appear in logs, exceptions, or Integration Exception records (assert on captured output for a synthetic credential) | CONFIGURATION.md §5 |
 
+### Post-spine additions (Phases 12-27; tests ship with each feature)
+
+| File | Covers |
+|---|---|
+| test_draft_delivery_note | Operator-invoked draft DN: SELF-only, idempotent, draft refused sources (INV-7/8) |
+| test_woocommerce_adapter / test_amazon_adapter / test_walmart_adapter | PII-free translation, rules-as-data, e2e through the shared pipeline, unknown SKU/fulfillment fail closed |
+| test_woocommerce_webhook | HMAC verification (constant-time), tampered/unsigned rejected, duplicate idempotent, kill switch raises |
+| test_shipstation_status | Status events: linked/unlinked, idempotent, never touch stock (T-SHIP-1..4) |
+| test_auto_submit_dn | STOCK-FLOW §5: kill switch off = draft stays; on = existing draft submits exactly once; never creates; voided ignored |
+| test_replay / test_retention | Resolution loop statuses incl. Failed Replay; payload purge keeps hash+reference, never touches open exceptions |
+| test_sales_invoice / test_payment_entry / test_returns | Order-to-cash and returns: drafts only, idempotent, FBA/WFS refused, stock restored only on human submit |
+| test_scheduler | Exactly two approved jobs; sync no-ops fully when disabled; per-channel failure isolation |
+| test_permissions | Operations role rights matrix (triage write, config/audit read-only) |
+| test_reports / test_workspace_and_reorder | Script Reports execute; workspace exists; reorder shortfall surfaces with zero invented policy |
+| test_settlement | Read-only Amazon settlement matching; asserts zero documents created |
+
 ## 3. Coverage check (invariant → tests)
 
 - INV-1: T-RES-3 · INV-2: T-RES-1/4/5 · INV-3: T-RES-1 · INV-4: T-RES-2/3

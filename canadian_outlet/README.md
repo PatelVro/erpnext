@@ -18,15 +18,19 @@ Requires `frappe` and `erpnext` at version-15.
 
 ## Status
 
-Order spine complete and verified (49+ tests green on a v15 bench): planning
+Full suite verified (94 tests green on a v15 bench; phases 0-27): planning
 docs, 7 custom DocTypes, Sales Order custom fields, item resolution,
 fulfillment classification, the shared Order Import Service, operator-invoked
 draft Delivery Notes (SELF only), WooCommerce/Amazon/Walmart importers,
 ShipStation status sync, exception replay, and the retention purge.
 
-Still gated until explicitly scoped: scheduled jobs of any kind, webhook
-transports, automatic stock posting (docs/STOCK-FLOW.md §5), payment
-reconciliation, frontend pages. See docs/OPERATIONS.md for the runbook.
+Also live, each explicitly approved and kill-switched/pinned by tests:
+WooCommerce webhooks, shipped-event Delivery Note submission (STOCK-FLOW §5),
+exactly two scheduled jobs (daily sync, weekly purge), order-to-cash with
+returns, operations role, reports + workspace, and read-only Amazon
+settlement matching. Still gated: settlement GL postings (accounting
+policy), purchasing automation, custom frontend pages. See
+docs/OPERATIONS.md for the runbook.
 
 ## License
 
