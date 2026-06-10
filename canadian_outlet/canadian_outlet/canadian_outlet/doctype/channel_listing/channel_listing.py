@@ -10,6 +10,14 @@ from frappe.model.document import Document
 class ChannelListing(Document):
 	def validate(self):
 		self._validate_unique_identity()
+		self._validate_item_enabled()
+
+	def _validate_item_enabled(self):
+		# A listing to a disabled Item would fail closed at resolution and
+		# flood Integration Exceptions; catch it at mapping time instead
+		# (INV-2 hygiene — surfaced by the Channel Listing Health report).
+		if frappe.db.get_value("Item", self.item, "disabled"):
+			frappe.throw(_("Item {0} is disabled and cannot be mapped").format(self.item))
 
 	def _validate_unique_identity(self):
 		# (channel, external_identity) is unique: one external identity maps

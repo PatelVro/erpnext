@@ -78,5 +78,23 @@ class TestItemResolution(FrappeTestCase):
 		with self.assertRaises(UnresolvedListingError):
 			resolve_external_identity(CHANNEL, utils.TEST_ITEM)
 
+	def test_listing_to_disabled_item_is_refused(self):
+		# Phase 23 hardening: catch bad mappings at mapping time, not at
+		# resolution time (INV-2 hygiene).
+		if not frappe.db.exists("Item", "CO-DISABLED-ITEM"):
+			frappe.get_doc(
+				{
+					"doctype": "Item",
+					"item_code": "CO-DISABLED-ITEM",
+					"item_name": "CO Disabled Item",
+					"item_group": "_Test Item Group",
+					"stock_uom": "Nos",
+					"disabled": 1,
+				}
+			).insert()
+		self.assertRaises(
+			frappe.ValidationError, utils.make_listing, CHANNEL, "EXT-DISABLED", "CO-DISABLED-ITEM"
+		)
+
 # Frappe test runner: create ERPNext standard test records first.
 test_dependencies = ["Company", "Item", "Customer", "Warehouse"]
