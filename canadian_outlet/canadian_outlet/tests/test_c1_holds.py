@@ -29,6 +29,7 @@ class TestC1Holds(FrappeTestCase):
 		utils.make_rule(CHANNEL, "fulfillment_channel", "MFN", "SELF")
 		utils.make_rule(CHANNEL, "fulfillment_channel", "AFN", "FBA")
 		utils.enable_imports()
+		frappe.db.set_single_value("Canadian Outlet Settings", "deduct_on_shipped_event", 0)
 
 	def _import(self, order_id, qty=2, evidence=None, **overrides):
 		from canadian_outlet.co_orders.import_service import import_order

@@ -26,6 +26,7 @@ class TestShipStationStatus(FrappeTestCase):
 		utils.make_channel(CHANNEL, "WooCommerce")
 		utils.make_rule(CHANNEL, "channel_source", "woocommerce", "SELF")
 		utils.enable_imports()
+		frappe.db.set_single_value("Canadian Outlet Settings", "deduct_on_shipped_event", 0)
 
 	def _import_order(self, order_id):
 		from canadian_outlet.co_orders.import_service import import_order

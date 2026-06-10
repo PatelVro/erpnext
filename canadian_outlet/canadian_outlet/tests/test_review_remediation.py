@@ -189,46 +189,47 @@ class TestWebhookChannelIsolation(FrappeTestCase):
 				frappe.conf["co_woocommerce_webhook_secret"] = saved
 
 
-class TestAutoSubmitFailurePath(FrappeTestCase):
-	def test_failed_submit_is_logged_and_draft_survives(self):
-		# Shipped event arrives, kill switch ON, but the draft cannot submit
-		# (no stock): the failure is logged, the draft stays for the human
-		# queue, and the event is still recorded.
-		from canadian_outlet.co_inventory.delivery_note_service import create_draft_delivery_note
+class TestDeductionFailurePath(FrappeTestCase):
+	def test_failed_deduction_is_logged_and_nothing_moves(self):
+		# C2: shipped event arrives with switch ③ ON, but the deduction fails
+		# mid-flight — the failure is logged, nothing is deducted, and the
+		# event is recorded WITHOUT a delivery_note link so the operator can
+		# retry it from the human queue.
 		from canadian_outlet.co_orders.import_service import import_order
-		from canadian_outlet.co_shipping.shipstation import record_shipment_event, translate_shipment
+		from canadian_outlet.co_shipping import shipstation
 
 		utils.make_channel(CHANNEL, "WooCommerce")
 		utils.make_rule(CHANNEL, "channel_source", "woocommerce", "SELF")
 		utils.enable_imports()
-		frappe.db.set_single_value(
-			"Canadian Outlet Settings", "auto_submit_delivery_note_on_shipped", 1
-		)
-		from frappe.model.document import Document
+		frappe.db.set_single_value("Canadian Outlet Settings", "deduct_on_shipped_event", 1)
 
 		utils.make_listing(CHANNEL, "EXT-SKU-FAILSUB")
-		result = import_order(
+		import_order(
 			utils.make_order(
 				CHANNEL, "ORD-FAILSUB",
 				lines=[{"external_identity": "EXT-SKU-FAILSUB", "qty": 1, "rate": 5}],
 			)
 		)
-		so = frappe.get_doc("Sales Order", result.sales_order)
-		dn_name = create_draft_delivery_note(so.name)  # C1: SO arrives submitted  # no stock provided
 
 		error_logs_before = frappe.db.count("Error Log")
-		# The test site allows negative stock (ERPNext test bootstrap), so a
-		# stock shortage cannot fail the submit here; inject the failure.
-		with patch.object(Document, "submit", side_effect=frappe.ValidationError("synthetic submit failure")):
-			event_name = record_shipment_event(
-				translate_shipment(CHANNEL, {
+		dn_before = frappe.db.count("Delivery Note")
+		with patch(
+			"canadian_outlet.co_inventory.delivery_note_service.create_delivery_for_shipment",
+			side_effect=frappe.ValidationError("synthetic deduction failure"),
+		):
+			event_name = shipstation.record_shipment_event(
+				shipstation.translate_shipment(CHANNEL, {
 					"orderNumber": "ORD-FAILSUB", "carrierCode": "canada_post",
 					"trackingNumber": "TRACK-FAILSUB", "shipDate": "2026-01-08", "voided": False,
+					"shipmentItems": [{"sku": "EXT-SKU-FAILSUB", "quantity": 1}],
 				})
 			)
 
 		self.assertTrue(frappe.db.exists("Shipment Status Event", event_name))
-		self.assertEqual(frappe.db.get_value("Delivery Note", dn_name, "docstatus"), 0)
+		self.assertFalse(
+			frappe.db.get_value("Shipment Status Event", event_name, "delivery_note")
+		)
+		self.assertEqual(frappe.db.count("Delivery Note"), dn_before)
 		self.assertGreater(frappe.db.count("Error Log"), error_logs_before)
 
 # Frappe test runner: create ERPNext standard test records first.

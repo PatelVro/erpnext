@@ -13,7 +13,9 @@
   "tracking_number",
   "event_timestamp",
   "source",
-  "event_hash"
+  "event_hash",
+  "shipment_items",
+  "delivery_note"
  ],
  "fields": [
   {
@@ -74,10 +76,24 @@
    "label": "Event Hash",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "description": "JSON [{sku, qty}] from the source shipment \u2014 sku+qty only (PRIVACY-REDACTION \u00a74). Drives the per-shipment deduction (C2).",
+   "fieldname": "shipment_items",
+   "fieldtype": "Code",
+   "label": "Shipment Items"
+  },
+  {
+   "description": "Set when this event was converted into a deduction (C2); conversion is idempotent on this link.",
+   "fieldname": "delivery_note",
+   "fieldtype": "Link",
+   "label": "Delivery Note",
+   "options": "Delivery Note",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2026-06-10 00:00:00.000000",
+ "modified": "2026-06-10 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Canadian Outlet",
  "name": "Shipment Status Event",

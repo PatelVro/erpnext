@@ -75,23 +75,28 @@ Delivery Note submitted (human)  ← stock deducts at 1431 Yonge, exactly once
   system's parallel "Material Issue on shipped event" model is retired entirely.
 - **No scheduled jobs** touching stock.
 
-## 5. Approved upgrade: shipped event submits the existing draft (Phase 18)
+## 5. Hold→deduction at shipped (C2 — supersedes the Phase 18 draft-submit design)
 
-Explicitly approved and implemented, exactly as this section originally
-required: a recorded ShipStation "shipped" event **submits the linked existing
-draft Delivery Note** — it never creates a new parallel document, so the
-deduction stays exactly-once and flows through the same single document.
+Per FLOW-DECISIONS D5/D7: a recorded "shipped" event (never label creation —
+voids stay inert, 1B) converts the order's hold into a real deduction by
+**creating and submitting a partial Delivery Note for exactly that shipment's
+quantities**, box by box for partial orders.
 
-Constraints (enforced in `co_shipping.shipstation` and by
-`tests/test_auto_submit_dn.py`):
+Constraints (enforced in `co_shipping.shipstation.process_shipment_event` and
+pinned by `tests/test_c2_deduction.py`):
 
-- **Kill switch:** `Canadian Outlet Settings.auto_submit_delivery_note_on_shipped`,
-  OFF by default — submission stays human until deliberately enabled.
-- SELF orders only (INV-7); voided events never submit.
-- Duplicate shipped events are idempotent (event_hash dedup); a second distinct
-  event finds no draft and is a no-op.
-- A failed submit is logged and leaves the draft in the human review queue —
-  §3 remains the backstop, not a replaced path.
+- **Switch ③:** `Canadian Outlet Settings.deduct_on_shipped_event`, OFF by
+  default (D10 manual-first) — while off, the operator converts each recorded
+  event with one click; the switch automates the identical call.
+- SELF orders only (INV-7); FBA/WFS events deduct nothing; voids are inert.
+- Shipment items resolve through Channel Listing (INV-2); unknown SKUs or
+  missing item data fail closed — no deduction, event kept for the queue.
+- Quantities cap at the order's undelivered remainder; over-shipments are
+  logged, never deducted past the order.
+- Idempotent: duplicate events dedup on event_hash; a converted event carries
+  its Delivery Note link and is a no-op thereafter.
+- A failed conversion is logged and the event stays unconverted for retry —
+  the human queue remains the backstop.
 
 ## 6. Operational ownership
 

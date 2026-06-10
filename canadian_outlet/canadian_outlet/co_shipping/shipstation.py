@@ -1,10 +1,10 @@
-# ShipStation shipment STATUS sync (Phase 14) — records what the carrier
-# says, nothing more. This module must never create, submit, or cancel any
-# stock-impacting document, never auto-submit Delivery Notes, and never treat
-# "shipped" as "stock posted" (INV-8, docs/STOCK-FLOW.md §4). Duplicate
-# events are idempotent on event_hash (docs/DATA-MODEL.md §7A, T-SHIP-2).
-# Transport is operator-triggered only — no scheduler (AGENTS.md scope gates).
-# Config keys per docs/CONFIGURATION.md §4.3.
+# ShipStation shipment sync. Recording an event is always safe and
+# informational; converting a shipped event into a deduction (C2,
+# FLOW-DECISIONS D5/D7) happens only via process_shipment_event — operator-
+# invoked while switch ③ deduct_on_shipped_event is OFF (the default),
+# automatic when it is deliberately ON. The deduction document is a
+# created-and-submitted partial Delivery Note (INV-8). Duplicate events are
+# idempotent on event_hash. Config keys per docs/CONFIGURATION.md §4.3.
 
 import hashlib
 
@@ -18,8 +18,14 @@ DEFAULT_BASE_URL = "https://ssapi.shipstation.com"
 def translate_shipment(channel, payload):
 	"""ShipStation /shipments record -> canonical shipment event. Carries no
 	buyer data: ship-to addresses are deliberately dropped
-	(docs/PRIVACY-REDACTION.md §4)."""
+	(docs/PRIVACY-REDACTION.md §4); shipment items keep sku+qty only."""
+	import json as _json
+
 	carrier_status = "voided" if payload.get("voided") else "shipped"
+	shipment_items = [
+		{"sku": item.get("sku") or "", "qty": item.get("quantity") or 0}
+		for item in (payload.get("shipmentItems") or [])
+	]
 	event = {
 		"channel": channel,
 		"channel_order_id": str(payload.get("orderNumber") or ""),
@@ -28,6 +34,7 @@ def translate_shipment(channel, payload):
 		"tracking_number": payload.get("trackingNumber"),
 		"event_timestamp": payload.get("shipDate") or payload.get("createDate"),
 		"source": "ShipStation",
+		"shipment_items": _json.dumps(shipment_items) if shipment_items else None,
 	}
 	event["event_hash"] = hashlib.sha256(
 		"|".join(
@@ -63,47 +70,82 @@ def record_shipment_event(event):
 		}
 	)
 	doc.insert(ignore_permissions=True)
-	_maybe_auto_submit_delivery_note(doc)
+	# C2 (switch ③, OFF by default — D10 manual-first): when enabled, a
+	# shipped event converts the hold to a deduction immediately; when off,
+	# the operator runs process_shipment_event per event.
+	if frappe.db.get_single_value("Canadian Outlet Settings", "deduct_on_shipped_event"):
+		try:
+			process_shipment_event(doc.name)
+		except Exception:
+			frappe.log_error(
+				title=f"Shipment deduction failed: {doc.name}",
+				message=frappe.get_traceback(),
+			)
 	return doc.name
 
 
-def _maybe_auto_submit_delivery_note(event):
-	"""STOCK-FLOW §5 upgrade, explicitly approved: a 'shipped' event SUBMITS
-	the existing draft Delivery Note of the matching SELF order. Constraints,
-	all enforced here and by tests (test_auto_submit_dn):
-	- kill switch: auto_submit_delivery_note_on_shipped, OFF by default
-	- never creates a Delivery Note — only submits an existing draft
-	- SELF only (INV-7); exactly-once (event dedup + a submitted DN leaves
-	  no draft for later events)
-	- a failed submit leaves the draft for the human queue (logged), so the
-	  human review path remains the backstop"""
-	if event.carrier_status != "shipped":
-		return
-	if not event.sales_order:
-		return
-	if not frappe.db.get_single_value(
-		"Canadian Outlet Settings", "auto_submit_delivery_note_on_shipped"
-	):
-		return
-	if frappe.db.get_value("Sales Order", event.sales_order, "co_fulfillment_type") != "SELF":
-		return
+@frappe.whitelist()
+def process_shipment_event(event_name):
+	"""C2 (FLOW-DECISIONS D5/D7): convert one shipped event's hold into a real
+	deduction — a created-and-submitted partial Delivery Note for exactly that
+	shipment's quantities. Constraints, all pinned by tests
+	(test_c2_deduction):
+	- shipped events only; voids are inert (1B — voids never touch the books)
+	- SELF orders only (INV-7); FBA/WFS events deduct nothing
+	- shipment items resolve through Channel Listing (INV-2); unknown SKU or
+	  missing items → no deduction, event stays for the human queue
+	- quantities cap at the order's undelivered remainder; over-shipments are
+	  logged, never deducted past the order
+	- idempotent: an event that already produced a Delivery Note is a no-op,
+	  and delivered-qty capping makes duplicate boxes safe
+	Returns the Delivery Note name, or None when nothing was deducted."""
+	import json as _json
 
-	draft = frappe.get_all(
-		"Delivery Note Item",
-		filters={"against_sales_order": event.sales_order, "docstatus": 0},
-		pluck="parent",
-		limit=1,
+	from canadian_outlet.co_catalog.resolution import (
+		UnresolvedListingError,
+		resolve_external_identity,
 	)
-	if not draft:
-		return
+	from canadian_outlet.co_inventory.delivery_note_service import create_delivery_for_shipment
 
-	try:
-		frappe.get_doc("Delivery Note", draft[0]).submit()
-	except Exception:
+	event = frappe.get_doc("Shipment Status Event", event_name)
+	if event.carrier_status != "shipped" or not event.sales_order:
+		return None
+	if event.delivery_note:
+		return None  # already converted — idempotent
+	if frappe.db.get_value("Sales Order", event.sales_order, "co_fulfillment_type") != "SELF":
+		return None
+
+	if not event.shipment_items:
 		frappe.log_error(
-			title=f"Auto-submit failed: {draft[0]} (event {event.name})",
-			message=frappe.get_traceback(),
+			title=f"Shipment event without items: {event.name}",
+			message="No shipmentItems in the source payload; nothing deducted (fail closed).",
 		)
+		return None
+
+	item_qtys = {}
+	for entry in _json.loads(event.shipment_items):
+		try:
+			item_code = resolve_external_identity(event.channel, entry.get("sku"))
+		except UnresolvedListingError:
+			frappe.log_error(
+				title=f"Shipment SKU unmapped: {event.name}",
+				message=f"sku={entry.get('sku')!r} has no active Channel Listing; "
+				"nothing deducted (fail closed, INV-2/INV-10).",
+			)
+			return None
+		item_qtys[item_code] = item_qtys.get(item_code, 0) + (entry.get("qty") or 0)
+
+	requested = dict(item_qtys)
+	dn_name = create_delivery_for_shipment(event.sales_order, item_qtys)
+	if dn_name:
+		if any(qty > 0 for qty in item_qtys.values()):
+			frappe.log_error(
+				title=f"Over-shipment capped: {event.name}",
+				message=f"Channel reported {requested}; undeliverable remainder "
+				f"{ {k: v for k, v in item_qtys.items() if v > 0} } was not deducted.",
+			)
+		event.db_set("delivery_note", dn_name)
+	return dn_name
 
 
 def fetch_shipments(page=1, page_size=100, ship_date_start=None):

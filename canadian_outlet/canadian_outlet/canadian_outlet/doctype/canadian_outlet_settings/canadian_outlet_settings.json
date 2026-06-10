@@ -6,8 +6,8 @@
  "field_order": [
   "imports_enabled",
   "default_warehouse",
-  "auto_submit_delivery_note_on_shipped",
-  "marketplace_fulfillment_supplier"
+  "marketplace_fulfillment_supplier",
+  "deduct_on_shipped_event"
  ],
  "fields": [
   {
@@ -25,23 +25,23 @@
    "options": "Warehouse"
   },
   {
-   "default": "0",
-   "description": "STOCK-FLOW \u00a75 upgrade kill switch. When ON, a recorded ShipStation 'shipped' event submits the EXISTING draft Delivery Note of the matching SELF order (never creates one). Off by default: submission stays human.",
-   "fieldname": "auto_submit_delivery_note_on_shipped",
-   "fieldtype": "Check",
-   "label": "Auto-Submit Delivery Note on Shipped Event"
-  },
-  {
    "description": "Set on FBA/WFS order lines as the drop-ship fulfiller (INV-7): marketplace-fulfilled rows hold no shelf stock and map to no Delivery Note. Required before FBA/WFS orders can import (fail closed).",
    "fieldname": "marketplace_fulfillment_supplier",
    "fieldtype": "Link",
    "label": "Marketplace Fulfillment Supplier",
    "options": "Supplier"
+  },
+  {
+   "default": "0",
+   "description": "Switch \u2462 (C2, FLOW-DECISIONS D5/D10): when ON, a recorded shipped event immediately converts its hold into a per-shipment deduction (created+submitted partial Delivery Note). OFF by default \u2014 operators convert each event manually until trusted.",
+   "fieldname": "deduct_on_shipped_event",
+   "fieldtype": "Check",
+   "label": "Deduct on Shipped Event"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-10 13:00:00.000000",
+ "modified": "2026-06-10 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Canadian Outlet",
  "name": "Canadian Outlet Settings",

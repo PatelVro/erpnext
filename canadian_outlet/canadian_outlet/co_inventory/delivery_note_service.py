@@ -41,3 +41,43 @@ def create_draft_delivery_note(sales_order):
 	dn = make_delivery_note(so.name)
 	dn.insert()  # draft only — submission is a human action (INV-8)
 	return dn.name
+
+
+def create_delivery_for_shipment(sales_order, item_qtys):
+	"""C2 (FLOW-DECISIONS D5/D7): create AND SUBMIT a partial Delivery Note
+	for exactly one shipment's quantities — the hold→deduction conversion,
+	box by box. Quantities are capped at the order's undelivered remainder
+	(channel-reported over-shipments are logged by the caller, never deducted
+	past the order). Returns the DN name, or None when nothing remains to
+	deliver. SELF-only is enforced by the caller; INV-8 holds: the submitted
+	Delivery Note is the stock document."""
+	from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+	so = frappe.get_doc("Sales Order", sales_order)
+	if so.co_fulfillment_type != "SELF" or so.docstatus != 1:
+		return None
+
+	dn = make_delivery_note(so.name)
+	rows = []
+	for row in dn.items:
+		wanted = item_qtys.get(row.item_code, 0)
+		if wanted <= 0:
+			continue
+		# row.qty from the mapper is the undelivered remainder — the cap.
+		take = min(wanted, row.qty)
+		if take <= 0:
+			continue
+		row.qty = take
+		item_qtys[row.item_code] = wanted - take
+		rows.append(row)
+
+	if not rows:
+		return None
+
+	dn.items = []
+	for index, row in enumerate(rows, start=1):
+		row.idx = index
+		dn.append("items", row)
+	dn.insert(ignore_permissions=True)
+	dn.submit()  # the deduction (INV-8), exactly this shipment's quantities
+	return dn.name
