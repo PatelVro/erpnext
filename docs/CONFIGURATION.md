@@ -76,9 +76,13 @@ a key listed here must be read with exactly this name.
 | `co_woocommerce_consumer_secret` | yes | Woo REST API consumer secret |
 | `co_woocommerce_api_path` | no | API path prefix; defaults to `/wp-json/wc/v3` |
 
-### 4.3 ShipStation (reserved — keys land in Phase 7)
+### 4.3 ShipStation (Phase 14 — final)
 
-Namespace `co_shipstation_*`.
+| Key | Required | Purpose |
+|---|---|---|
+| `co_shipstation_api_key` | yes | ShipStation API key |
+| `co_shipstation_api_secret` | yes | ShipStation API secret |
+| `co_shipstation_base_url` | no | Defaults to `https://ssapi.shipstation.com` |
 
 ### 4.4 Amazon SP-API (reserved — keys land in Phase 8)
 

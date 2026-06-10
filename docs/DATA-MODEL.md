@@ -125,6 +125,30 @@ Append-only record of every import attempt (INV-11A evidence trail).
 | integration_exception | Link Integration Exception | When outcome = Exception |
 | payload_hash | Data | §9 |
 
+## 7A. Custom DocType: Shipment Status Event (Phase 14)
+
+Append-only record of carrier/shipment status per channel order — **status sync
+only**. Recording an event never creates, submits, or implies any stock
+document; "shipped" recorded here is NOT "stock posted" (INV-8,
+docs/STOCK-FLOW.md §4). Schema decision made in Phase 14 (a 7th custom
+DocType, preferred over Sales Order custom fields to keep an auditable
+event history).
+
+| Field | Type | Notes |
+|---|---|---|
+| channel | Link Channel | |
+| channel_order_id | Data | |
+| sales_order | Link Sales Order | Resolved via (co_sales_channel, co_channel_order_id); empty when no matching order exists — recording is informational and never fails closed into order flow |
+| carrier | Data | e.g. carrier code |
+| carrier_status | Data | e.g. shipped / voided, as the source reports it |
+| tracking_number | Data | Not PII; addresses are never stored (PRIVACY-REDACTION §4) |
+| event_timestamp | Data | Source timestamp, verbatim |
+| source | Data | e.g. ShipStation |
+| event_hash | Data (unique) | Hash of (channel, order, tracking, status, timestamp) — duplicate events are idempotent |
+
+Like Order Import Log, permissions omit write/delete: rows are created by the
+shipping sync service and never edited.
+
 ## 8. Custom fields on standard DocTypes (fixtures, Phase 3)
 
 On **Sales Order**:

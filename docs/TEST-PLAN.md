@@ -85,6 +85,15 @@ IDs are stable and referenced from code review.
 | T-PII-1 | An Integration Exception created from an import failure stores no full unredacted payload: raw_payload_redacted and replay_payload_minimal contain only fields on the PRIVACY-REDACTION.md §3 allowlist (unknown payload fields are stripped) | PRIVACY-REDACTION.md, INV-10 |
 | T-PII-2 | Disallowed PII (name, any address part, phone, email, payment data) planted in a synthetic payload appears nowhere in the stored Integration Exception or Order Import Log record, including failure_reason text | PRIVACY-REDACTION.md |
 
+### Shipment status sync (Phase 14)
+
+| ID | Test | Invariant |
+|---|---|---|
+| T-SHIP-1 | A shipment event is recorded and linked to the matching Sales Order via (channel, channel_order_id) | DATA-MODEL §7A |
+| T-SHIP-2 | Recording the same event twice yields exactly one row (event_hash) | INV-11 (spirit), DATA-MODEL §7A |
+| T-SHIP-3 | Recording a "shipped" event creates no Delivery Note, no Stock Entry, no stock ledger entry, and changes no document status | INV-8, STOCK-FLOW §4 |
+| T-SHIP-4 | An event for an unknown order is recorded unlinked (informational; no exception flood, no order-flow side effects) | DATA-MODEL §7A |
+
 ### Configuration (Phase 5+)
 
 | ID | Test | Invariant |
