@@ -71,14 +71,23 @@ Delivery Note submitted (human)  ← stock deducts at 1431 Yonge, exactly once
   system's parallel "Material Issue on shipped event" model is retired entirely.
 - **No scheduled jobs** touching stock.
 
-## 5. Future upgrade path (recorded, not approved)
+## 5. Approved upgrade: shipped event submits the existing draft (Phase 18)
 
-A later phase may propose: ShipStation "shipped" event → **submit the linked
-existing draft Delivery Note** (never create a new parallel document), making the
-deduction automatic but still exactly-once and still flowing through the same
-single document. That proposal must come with idempotency tests (duplicate
-shipped events), a kill switch in Canadian Outlet Settings, and explicit
-approval. Until then, §2 and §3 are the entire stock model.
+Explicitly approved and implemented, exactly as this section originally
+required: a recorded ShipStation "shipped" event **submits the linked existing
+draft Delivery Note** — it never creates a new parallel document, so the
+deduction stays exactly-once and flows through the same single document.
+
+Constraints (enforced in `co_shipping.shipstation` and by
+`tests/test_auto_submit_dn.py`):
+
+- **Kill switch:** `Canadian Outlet Settings.auto_submit_delivery_note_on_shipped`,
+  OFF by default — submission stays human until deliberately enabled.
+- SELF orders only (INV-7); voided events never submit.
+- Duplicate shipped events are idempotent (event_hash dedup); a second distinct
+  event finds no draft and is a no-op.
+- A failed submit is logged and leaves the draft in the human review queue —
+  §3 remains the backstop, not a replaced path.
 
 ## 6. Operational ownership
 

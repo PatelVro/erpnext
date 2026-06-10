@@ -174,6 +174,13 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 	selling_price_list = currency and frappe.db.get_value(
 		"Price List", {"currency": currency, "selling": 1, "enabled": 1}
 	)
+	# SELF orders inherit the configured physical warehouse so the eventual
+	# Delivery Note maps it (docs/STOCK-FLOW.md §1/§3). Informational on the
+	# Sales Order itself — a Sales Order never moves stock. FBA/WFS orders
+	# carry no local warehouse reference (INV-7).
+	warehouse = None
+	if fulfillment_type == "SELF":
+		warehouse = frappe.db.get_single_value("Canadian Outlet Settings", "default_warehouse")
 	doc = frappe.get_doc(
 		{
 			"doctype": "Sales Order",
@@ -191,6 +198,7 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 					"qty": line["qty"],
 					"rate": line["rate"],
 					"delivery_date": delivery_date,
+					"warehouse": warehouse,
 				}
 				for line in resolved_lines
 			],

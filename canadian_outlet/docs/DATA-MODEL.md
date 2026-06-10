@@ -109,7 +109,8 @@ Initial fields are minimal and added per phase. Reserved from day one:
 | Field | Type | Notes |
 |---|---|---|
 | imports_enabled | Check | Global kill switch for the Order Import Service |
-| default_warehouse | Link Warehouse | 1431 Yonge (provisional, see `docs/STOCK-FLOW.md` §1) |
+| default_warehouse | Link Warehouse | 1431 Yonge (provisional, see `docs/STOCK-FLOW.md` §1). SELF Sales Orders inherit it on their items |
+| auto_submit_delivery_note_on_shipped | Check | STOCK-FLOW §5 kill switch, OFF by default (Phase 18) |
 
 ## 7. Custom DocType: Order Import Log
 

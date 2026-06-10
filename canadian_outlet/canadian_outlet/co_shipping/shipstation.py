@@ -63,7 +63,47 @@ def record_shipment_event(event):
 		}
 	)
 	doc.insert(ignore_permissions=True)
+	_maybe_auto_submit_delivery_note(doc)
 	return doc.name
+
+
+def _maybe_auto_submit_delivery_note(event):
+	"""STOCK-FLOW §5 upgrade, explicitly approved: a 'shipped' event SUBMITS
+	the existing draft Delivery Note of the matching SELF order. Constraints,
+	all enforced here and by tests (test_auto_submit_dn):
+	- kill switch: auto_submit_delivery_note_on_shipped, OFF by default
+	- never creates a Delivery Note — only submits an existing draft
+	- SELF only (INV-7); exactly-once (event dedup + a submitted DN leaves
+	  no draft for later events)
+	- a failed submit leaves the draft for the human queue (logged), so the
+	  human review path remains the backstop"""
+	if event.carrier_status != "shipped":
+		return
+	if not event.sales_order:
+		return
+	if not frappe.db.get_single_value(
+		"Canadian Outlet Settings", "auto_submit_delivery_note_on_shipped"
+	):
+		return
+	if frappe.db.get_value("Sales Order", event.sales_order, "co_fulfillment_type") != "SELF":
+		return
+
+	draft = frappe.get_all(
+		"Delivery Note Item",
+		filters={"against_sales_order": event.sales_order, "docstatus": 0},
+		pluck="parent",
+		limit=1,
+	)
+	if not draft:
+		return
+
+	try:
+		frappe.get_doc("Delivery Note", draft[0]).submit()
+	except Exception:
+		frappe.log_error(
+			title=f"Auto-submit failed: {draft[0]} (event {event.name})",
+			message=frappe.get_traceback(),
+		)
 
 
 def fetch_shipments(page=1, page_size=100, ship_date_start=None):

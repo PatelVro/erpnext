@@ -114,7 +114,14 @@ def make_order(channel, channel_order_id, lines=None, evidence=None, **overrides
 	return order
 
 
-def enable_imports(default_warehouse=TEST_WAREHOUSE):
+def enable_imports(default_warehouse=None):
+	if default_warehouse is None:
+		# SELF Sales Orders inherit this warehouse, and ERPNext requires it to
+		# belong to the order's company — which is the site default company.
+		default_company = frappe.defaults.get_global_default("company")
+		default_warehouse = frappe.db.get_value(
+			"Warehouse", {"company": default_company, "is_group": 0}
+		)
 	frappe.db.set_single_value("Canadian Outlet Settings", "imports_enabled", 1)
 	frappe.db.set_single_value("Canadian Outlet Settings", "default_warehouse", default_warehouse)
 

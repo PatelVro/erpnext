@@ -5,7 +5,8 @@
  "engine": "InnoDB",
  "field_order": [
   "imports_enabled",
-  "default_warehouse"
+  "default_warehouse",
+  "auto_submit_delivery_note_on_shipped"
  ],
  "fields": [
   {
@@ -16,11 +17,18 @@
    "label": "Imports Enabled"
   },
   {
-   "description": "The single physical warehouse (docs/STOCK-FLOW.md §1 — provisional: 1431 Yonge).",
+   "description": "The single physical warehouse (docs/STOCK-FLOW.md §1 — provisional: 1431 Yonge). SELF Sales Orders inherit this warehouse on their items.",
    "fieldname": "default_warehouse",
    "fieldtype": "Link",
    "label": "Default Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "description": "STOCK-FLOW §5 upgrade kill switch. When ON, a recorded ShipStation 'shipped' event submits the EXISTING draft Delivery Note of the matching SELF order (never creates one). Off by default: submission stays human.",
+   "fieldname": "auto_submit_delivery_note_on_shipped",
+   "fieldtype": "Check",
+   "label": "Auto-Submit Delivery Note on Shipped Event"
   }
  ],
  "issingle": 1,
