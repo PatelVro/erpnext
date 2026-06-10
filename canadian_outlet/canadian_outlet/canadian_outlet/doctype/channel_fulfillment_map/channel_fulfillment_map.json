@@ -1,0 +1,71 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-06-10 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "channel",
+  "evidence_key",
+  "evidence_value",
+  "fulfillment_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "channel",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Channel",
+   "options": "Channel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "evidence_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Evidence Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "evidence_value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Evidence Value",
+   "reqd": 1
+  },
+  {
+   "description": "Never UNKNOWN — absence of a matching row IS unknown and blocks import (INV-5, INV-6).",
+   "fieldname": "fulfillment_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Fulfillment Type",
+   "options": "SELF\nFBA\nWFS",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-06-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Canadian Outlet",
+ "name": "Channel Fulfillment Map",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "creation": "2026-06-10 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "imports_enabled",
+  "default_warehouse"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "description": "Global kill switch for the Order Import Service. Off by default: imports must be deliberately enabled (fail closed, INV-10).",
+   "fieldname": "imports_enabled",
+   "fieldtype": "Check",
+   "label": "Imports Enabled"
+  },
+  {
+   "description": "The single physical warehouse (docs/STOCK-FLOW.md §1 — provisional: 1431 Yonge).",
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Warehouse",
+   "options": "Warehouse"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-06-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Canadian Outlet",
+ "name": "Canadian Outlet Settings",
+ "naming_rule": "",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
