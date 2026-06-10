@@ -110,10 +110,12 @@ class TestWalmartAdapter(FrappeTestCase):
 		payload = synthetic_walmart_order("WM-1004", "3PLFulfilled", utils.default_currency())
 		result = import_order(translate_order(CHANNEL, payload))
 
-		self.assertEqual(result.outcome, "Exception")
-		self.assertEqual(utils.get_sales_orders(CHANNEL, "WM-1004"), [])
-		exceptions = utils.get_exceptions(CHANNEL, "WM-1004", failure_stage="Classification")
-		self.assertEqual(len(exceptions), 1)
+		# C3: quarantined draft, never SELF, holds nothing.
+		self.assertEqual(result.outcome, "Created")
+		self.assertTrue(result.quarantined)
+		sales_orders = utils.get_sales_orders(CHANNEL, "WM-1004")
+		self.assertEqual(sales_orders[0].docstatus, 0)
+		self.assertFalse(sales_orders[0].co_fulfillment_type)
 
 # Frappe test runner: create ERPNext standard test records first.
 test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

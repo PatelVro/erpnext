@@ -76,6 +76,7 @@ class ImportResult:
 	outcome: str  # Created | Duplicate | Exception
 	sales_order: Optional[str] = None
 	integration_exception: Optional[str] = None
+	quarantined: bool = False
 
 
 def import_order(order):
@@ -131,9 +132,10 @@ def import_order(order):
 			integration_exception=exception_name)
 		return ImportResult("Exception", integration_exception=exception_name)
 
+	quarantined = fulfillment_type is None
 	_write_log(channel, log_order_id, import_key, "Created", payload_hash,
 		sales_order=sales_order)
-	return ImportResult("Created", sales_order=sales_order)
+	return ImportResult("Created", sales_order=sales_order, quarantined=quarantined)
 
 
 def _find_existing_sales_order(channel, channel_order_id):
@@ -192,14 +194,13 @@ def _resolve_lines(channel, order):
 
 
 def _classify(channel, order):
+	"""Returns SELF/FBA/WFS, or None for QUARANTINE (C3, FLOW-DECISIONS D3):
+	unclear fulfillment imports as a real-but-quarantined draft instead of
+	being blocked. UNKNOWN is still never written and never becomes SELF
+	(INV-5/INV-6 as rewritten by C3)."""
 	fulfillment_type = classify_fulfillment(channel, order.get("evidence") or {})
 	if fulfillment_type == UNKNOWN or fulfillment_type not in VALID_FULFILLMENT_TYPES:
-		# INV-5/INV-6: UNKNOWN blocks import and is never written anywhere.
-		evidence_keys = sorted((order.get("evidence") or {}).keys())
-		raise _ImportBlocked(
-			"Classification",
-			f"Fulfillment evidence unmapped or contradictory (keys: {evidence_keys})",
-		)
+		return None
 	return fulfillment_type
 
 
@@ -227,7 +228,11 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 	# carry no local warehouse reference (INV-7).
 	warehouse = None
 	fulfillment_supplier = None
-	if fulfillment_type == "SELF":
+	if fulfillment_type is None:
+		# Quarantine (C3): no warehouse, no drop-ship — the draft holds
+		# nothing and waits for classify_quarantined_order.
+		pass
+	elif fulfillment_type == "SELF":
 		warehouse = frappe.db.get_single_value("Canadian Outlet Settings", "default_warehouse")
 	else:
 		# INV-7: FBA/WFS lines are DROP-SHIP rows (delivered_by_supplier) —
@@ -256,6 +261,7 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 			"co_sales_channel": channel,
 			"co_channel_order_id": channel_order_id,
 			"co_fulfillment_type": fulfillment_type,
+			"co_quarantined": 1 if fulfillment_type is None else 0,
 			"items": [
 				{
 					"item_code": line["item_code"],
@@ -263,7 +269,7 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 					"rate": line["rate"],
 					"delivery_date": delivery_date,
 					"warehouse": warehouse,
-					"delivered_by_supplier": 0 if fulfillment_type == "SELF" else 1,
+					"delivered_by_supplier": 1 if fulfillment_type in ("FBA", "WFS") else 0,
 					"supplier": fulfillment_supplier,
 				}
 				for line in resolved_lines
@@ -272,6 +278,10 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 	)
 	try:
 		doc.insert(ignore_permissions=True)
+		if fulfillment_type is None:
+			# Quarantined drafts stay drafts (C3): visible, counted,
+			# incapable of holding, shipping, or invoicing until classified.
+			return doc.name
 		# C1 (FLOW-DECISIONS D5, INV-12): a marketplace order is confirmed by
 		# definition, so it is submitted on arrival. Submission is NOT a stock
 		# movement (INV-8) — it places the availability HOLD: SELF lines carry

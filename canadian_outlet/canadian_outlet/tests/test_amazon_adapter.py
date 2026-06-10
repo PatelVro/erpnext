@@ -98,12 +98,12 @@ class TestAmazonAdapter(FrappeTestCase):
 		result = import_order(
 			self._translated(AmazonOrderId="111-0000003-0000003", FulfillmentChannel="SOMETHING-NEW")
 		)
-		self.assertEqual(result.outcome, "Exception")
-		self.assertEqual(utils.get_sales_orders(CHANNEL, "111-0000003-0000003"), [])
-		exceptions = utils.get_exceptions(
-			CHANNEL, "111-0000003-0000003", failure_stage="Classification"
-		)
-		self.assertEqual(len(exceptions), 1)
+		# C3: quarantined draft, never SELF, holds nothing.
+		self.assertEqual(result.outcome, "Created")
+		self.assertTrue(result.quarantined)
+		sales_orders = utils.get_sales_orders(CHANNEL, "111-0000003-0000003")
+		self.assertEqual(sales_orders[0].docstatus, 0)
+		self.assertFalse(sales_orders[0].co_fulfillment_type)
 
 # Frappe test runner: create ERPNext standard test records first.
 test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

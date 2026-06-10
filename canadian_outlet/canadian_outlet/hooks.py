@@ -36,6 +36,7 @@ fixtures = [
 					"Sales Order-co_sales_channel",
 					"Sales Order-co_channel_order_id",
 					"Sales Order-co_fulfillment_type",
+					"Sales Order-co_quarantined",
 				],
 			]
 		],

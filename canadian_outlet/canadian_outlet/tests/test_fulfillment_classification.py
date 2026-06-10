@@ -52,10 +52,13 @@ class TestFulfillmentClassification(FrappeTestCase):
 			evidence={"fulfillment_channel": "SOMETHING-NEW"},
 		)
 		result = import_order(order)
-		self.assertEqual(result.outcome, "Exception")
-		exceptions = utils.get_exceptions(AMZ, "ORD-FUL2", failure_stage="Classification")
-		self.assertEqual(len(exceptions), 1)
-		self.assertEqual(utils.get_sales_orders(AMZ, "ORD-FUL2"), [])
+		# C3 (FLOW-DECISIONS D3): unclear fulfillment imports QUARANTINED —
+		# a real draft order that holds nothing — instead of being blocked.
+		self.assertEqual(result.outcome, "Created")
+		self.assertTrue(result.quarantined)
+		sales_orders = utils.get_sales_orders(AMZ, "ORD-FUL2")
+		self.assertEqual(sales_orders[0].docstatus, 0)
+		self.assertFalse(sales_orders[0].co_fulfillment_type)
 
 	def test_t_ful_2b_contradictory_evidence_is_unknown(self):
 		# INV-5: contradictory matches fail closed, exactly like no match.

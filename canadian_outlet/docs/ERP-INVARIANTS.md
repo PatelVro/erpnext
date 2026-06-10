@@ -65,11 +65,13 @@ Each invariant is testable. `docs/TEST-PLAN.md` maps tests to invariants by ID.
   `SELF`, `FBA`, `WFS`.
 - `UNKNOWN` exists only inside the classifier as an intermediate result and is
   never written to any document or silently coerced to SELF.
-- **Superseded by FLOW-DECISIONS D3 (lands with BUILD-CHANGE-PLAN C3):** an
-  order classified UNKNOWN imports as a real Sales Order in **quarantine** —
-  visible and counted, but barred from holding stock, deducting, shipping, or
-  invoicing until a human classifies it. Until C3 lands, the current build's
-  behavior (blocked into Integration Exception) remains in force.
+- **C3 (FLOW-DECISIONS D3, in force):** an order classified UNKNOWN imports as
+  a real Sales Order in **quarantine** — a draft flagged `co_quarantined`:
+  visible and searchable, but a draft holds no stock, cannot ship, and cannot
+  invoice. Blank `co_fulfillment_type` is legal ONLY on quarantined drafts.
+  Release is human: `classify_quarantined_order` applies the verdict (SELF →
+  warehouse lines + submit/hold; FBA/WFS → drop-ship lines + submit) — the
+  system never guesses.
 
 ## INV-7 — Only SELF fulfillment can affect local stock
 

@@ -168,5 +168,5 @@ def get_sales_orders(channel, channel_order_id):
 	return frappe.get_all(
 		"Sales Order",
 		filters={"co_sales_channel": channel, "co_channel_order_id": channel_order_id},
-		fields=["name", "co_fulfillment_type", "docstatus"],
+		fields=["name", "co_fulfillment_type", "docstatus", "co_quarantined"],
 	)
