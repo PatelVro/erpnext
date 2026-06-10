@@ -84,16 +84,25 @@ a key listed here must be read with exactly this name.
 | `co_shipstation_api_secret` | yes | ShipStation API secret |
 | `co_shipstation_base_url` | no | Defaults to `https://ssapi.shipstation.com` |
 
-### 4.4 Amazon SP-API (reserved — keys land in Phase 8)
+### 4.4 Amazon SP-API (Phase 15 — final)
 
-Namespace `co_amazon_*`. The LWA-vs-SPAPI naming confusion of the old repo is
-resolved by fiat here: keys will be named `co_amazon_lwa_client_id`,
-`co_amazon_lwa_client_secret`, `co_amazon_lwa_refresh_token`,
-`co_amazon_marketplace_ids`, `co_amazon_region` — finalized in Phase 8.
+The LWA-vs-SPAPI naming confusion of the old repo is resolved by fiat here:
 
-### 4.5 Walmart (reserved — keys land in Phase 8)
+| Key | Required | Purpose |
+|---|---|---|
+| `co_amazon_lwa_client_id` | yes | Login-with-Amazon client ID |
+| `co_amazon_lwa_client_secret` | yes | LWA client secret |
+| `co_amazon_lwa_refresh_token` | yes | LWA refresh token |
+| `co_amazon_marketplace_ids` | yes | Comma-separated marketplace IDs |
+| `co_amazon_region` | no | `na` (default), `eu`, or `fe` |
 
-Namespace `co_walmart_*`.
+### 4.5 Walmart (Phase 16 — final)
+
+| Key | Required | Purpose |
+|---|---|---|
+| `co_walmart_client_id` | yes | Marketplace API client ID |
+| `co_walmart_client_secret` | yes | Marketplace API client secret |
+| `co_walmart_base_url` | no | Defaults to `https://marketplace.walmartapis.com` |
 
 ## 5. Secrets handling rules
 
