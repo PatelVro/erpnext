@@ -11,6 +11,12 @@ TERMINAL_STATUSES = ("Resolved", "Ignored")
 
 
 class IntegrationException(Document):
+	def after_insert(self):
+		# C7 (D6): instant tap on the shoulder per STOP. Best-effort.
+		from canadian_outlet.co_core.notifications import notify_stop
+
+		notify_stop(self)
+
 	def validate(self):
 		self._validate_ignored_reason()
 		self._set_terminal_timestamp()

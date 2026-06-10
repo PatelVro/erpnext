@@ -46,7 +46,10 @@ fixtures = [
 # Phase 24: the ONLY approved scheduled jobs (T-PIPE-1 pins this exact set).
 # Both no-op unless their kill switches are deliberately enabled.
 scheduler_events = {
-	"daily": ["canadian_outlet.co_core.scheduler.daily_channel_sync"],
+	"daily": [
+		"canadian_outlet.co_core.scheduler.daily_channel_sync",
+		"canadian_outlet.co_core.notifications.daily_review_digest",
+	],
 	"weekly": ["canadian_outlet.co_core.scheduler.weekly_retention_purge"],
 }
 

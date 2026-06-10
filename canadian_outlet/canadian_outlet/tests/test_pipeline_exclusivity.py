@@ -27,7 +27,10 @@ class TestPipelineExclusivity(FrappeTestCase):
 		self.assertEqual(
 			getattr(hooks, "scheduler_events", None),
 			{
-				"daily": ["canadian_outlet.co_core.scheduler.daily_channel_sync"],
+				"daily": [
+					"canadian_outlet.co_core.scheduler.daily_channel_sync",
+					"canadian_outlet.co_core.notifications.daily_review_digest",
+				],
 				"weekly": ["canadian_outlet.co_core.scheduler.weekly_retention_purge"],
 			},
 		)
