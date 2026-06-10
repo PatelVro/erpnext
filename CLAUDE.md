@@ -1,12 +1,9 @@
-# CLAUDE.md
+# CLAUDE.md (carrier repo root)
 
-Claude Code must read and follow **AGENTS.md** in this repository root.
+This repository is upstream ERPNext acting as a TRANSPORT CARRIER for the
+`canadian_outlet/` app directory. Do not modify ERPNext core files.
 
-AGENTS.md is binding for every session: repository boundaries, scope gates
-(integrations, frontend, scheduled jobs, stock automation), business-rule
-guardrails, and working discipline (list files before writing, show
-`git diff --stat` after, no commits without explicit approval).
-
-The business rules themselves are defined in `docs/ERP-INVARIANTS.md`
-(INV-1 … INV-11) and the other planning documents under `docs/`. When code
-and docs disagree, the docs win until a human changes them.
+The binding agent rules live in `canadian_outlet/AGENTS.md`; the business
+rules live in `canadian_outlet/docs/ERP-INVARIANTS.md`. Claude Code must read
+and follow both. When code and docs disagree, the docs win until a human
+changes them.
