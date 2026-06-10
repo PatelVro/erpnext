@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "creation": "2026-06-10 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "imports_enabled",
+  "default_warehouse",
+  "marketplace_fulfillment_supplier",
+  "deduct_on_shipped_event",
+  "auto_invoice_on_shipment",
+  "marketplace_tax_account",
+  "fba_warehouse",
+  "notification_email",
+  "safe_mode"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "description": "Global kill switch for the Order Import Service. Off by default: imports must be deliberately enabled (fail closed, INV-10).",
+   "fieldname": "imports_enabled",
+   "fieldtype": "Check",
+   "label": "Imports Enabled"
+  },
+  {
+   "description": "The single physical warehouse (docs/STOCK-FLOW.md \u00a71 \u2014 provisional: 1431 Yonge). SELF Sales Orders inherit this warehouse on their items.",
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "description": "Set on FBA/WFS order lines as the drop-ship fulfiller (INV-7): marketplace-fulfilled rows hold no shelf stock and map to no Delivery Note. Required before FBA/WFS orders can import (fail closed).",
+   "fieldname": "marketplace_fulfillment_supplier",
+   "fieldtype": "Link",
+   "label": "Marketplace Fulfillment Supplier",
+   "options": "Supplier"
+  },
+  {
+   "default": "0",
+   "description": "Switch \u2462 (C2, FLOW-DECISIONS D5/D10): when ON, a recorded shipped event immediately converts its hold into a per-shipment deduction (created+submitted partial Delivery Note). OFF by default \u2014 operators convert each event manually until trusted.",
+   "fieldname": "deduct_on_shipped_event",
+   "fieldtype": "Check",
+   "label": "Deduct on Shipped Event"
+  },
+  {
+   "default": "0",
+   "description": "Switch \u2463 (C5, FLOW-DECISIONS D9/D10): when ON, each per-shipment deduction also creates and submits the Sales Invoice in the same heartbeat. OFF by default \u2014 invoicing stays a human click until trusted.",
+   "fieldname": "auto_invoice_on_shipment",
+   "fieldtype": "Check",
+   "label": "Auto-Invoice on Shipment"
+  },
+  {
+   "description": "Account that receives marketplace-collected tax on imported orders (C5, D9: taxes recorded per order). Required when an order carries tax \u2014 imports with tax fail closed without it.",
+   "fieldname": "marketplace_tax_account",
+   "fieldtype": "Link",
+   "label": "Marketplace Tax Account",
+   "options": "Account"
+  },
+  {
+   "description": "The real 'At Amazon FBA' location (C6, FLOW-DECISIONS D4): inbound transfers land here and FBA sales deduct it. Leave empty to keep FBA unmodeled.",
+   "fieldname": "fba_warehouse",
+   "fieldtype": "Link",
+   "label": "FBA Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "description": "Receives STOP emails, the daily review digest, and 3-day escalations (C7, D6). Unset = no emails; the queues remain in the desk.",
+   "fieldname": "notification_email",
+   "fieldtype": "Data",
+   "label": "Notification Email",
+   "options": "Email"
+  },
+  {
+   "default": "0",
+   "description": "C8/INV-13 (owner's D10-3b): freezes everything that touches stock or money \u2014 automatic and one-click alike \u2014 while intake continues with every order quarantined. Nothing is lost; nothing moves until this is turned off.",
+   "fieldname": "safe_mode",
+   "fieldtype": "Check",
+   "label": "SAFE MODE (Big Red Button)"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-06-10 16:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Canadian Outlet",
+ "name": "Canadian Outlet Settings",
+ "naming_rule": "",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Canadian Outlet Operations",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

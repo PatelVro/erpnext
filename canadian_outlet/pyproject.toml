@@ -1,0 +1,17 @@
+[project]
+name = "canadian_outlet"
+authors = [
+    { name = "Canadian Outlet", email = "torvaldsl8@gmail.com" },
+]
+description = "Canadian Outlet business logic for ERPNext"
+requires-python = ">=3.10"
+readme = "README.md"
+dynamic = ["version"]
+dependencies = [
+    # Frappe and ERPNext are provided by the bench (version-15);
+    # they are deliberately not pip dependencies of this package.
+]
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"

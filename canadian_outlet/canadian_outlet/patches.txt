@@ -1,0 +1,2 @@
+canadian_outlet.patches.create_operations_role
+canadian_outlet.patches.add_channel_order_unique_index

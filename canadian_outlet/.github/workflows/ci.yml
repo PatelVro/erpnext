@@ -1,0 +1,80 @@
+# CI for the canadian_outlet app. Effective once this app lives in its own
+# repository (workflows only run from the repo root). Mirrors the verified
+# manual recipe: bench + frappe/erpnext version-15 + MariaDB + Redis, then
+# the full test suite (docs/TEST-PLAN.md).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: canadian_outlet
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq redis-server libmariadb-dev mariadb-client
+          sudo service redis-server start
+          npm install -g yarn
+
+      - name: Configure MariaDB for Frappe (utf8mb4)
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot -e "
+            SET GLOBAL character_set_server = 'utf8mb4';
+            SET GLOBAL collation_server = 'utf8mb4_unicode_ci';"
+
+      - name: Init bench (frappe version-15)
+        run: |
+          pip install frappe-bench
+          bench init co-bench --frappe-branch version-15 --skip-assets
+          cd co-bench
+          bench get-app erpnext --branch version-15 --skip-assets
+          bench get-app "$GITHUB_WORKSPACE/canadian_outlet" --skip-assets
+
+      - name: Create test site and install apps
+        working-directory: co-bench
+        run: |
+          bench new-site co-test.localhost \
+            --db-host 127.0.0.1 \
+            --mariadb-root-password root \
+            --admin-password admin
+          bench --site co-test.localhost install-app erpnext
+          bench --site co-test.localhost install-app canadian_outlet
+          bench --site co-test.localhost set-config allow_tests true
+          bench --site co-test.localhost execute erpnext.setup.utils.before_tests
+
+      - name: Run test suite
+        working-directory: co-bench
+        run: bench --site co-test.localhost run-tests --app canadian_outlet

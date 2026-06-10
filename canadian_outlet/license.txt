@@ -1,0 +1,8 @@
+Proprietary
+
+Copyright (c) Canadian Outlet. All rights reserved.
+
+This software and its source code are the confidential and proprietary
+property of Canadian Outlet. No part of it may be copied, modified,
+distributed, or used outside Canadian Outlet without prior written
+permission.
