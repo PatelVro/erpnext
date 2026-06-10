@@ -18,9 +18,15 @@ Requires `frappe` and `erpnext` at version-15.
 
 ## Status
 
-Phase 2 — bare scaffold. No business logic, no DocTypes, no integrations,
-no scheduled jobs, no frontend, no stock automation. Each arrives only in
-its explicitly approved phase (see the phase plan in the project docs).
+Order spine complete and verified (49+ tests green on a v15 bench): planning
+docs, 7 custom DocTypes, Sales Order custom fields, item resolution,
+fulfillment classification, the shared Order Import Service, operator-invoked
+draft Delivery Notes (SELF only), WooCommerce/Amazon/Walmart importers,
+ShipStation status sync, exception replay, and the retention purge.
+
+Still gated until explicitly scoped: scheduled jobs of any kind, webhook
+transports, automatic stock posting (docs/STOCK-FLOW.md §5), payment
+reconciliation, frontend pages. See docs/OPERATIONS.md for the runbook.
 
 ## License
 
