@@ -107,6 +107,11 @@ def process_shipment_event(event_name):
 	)
 	from canadian_outlet.co_inventory.delivery_note_service import create_delivery_for_shipment
 
+	from canadian_outlet.co_core.safe_mode import is_safe_mode
+
+	if is_safe_mode():
+		return None  # INV-13: events record, nothing converts
+
 	event = frappe.get_doc("Shipment Status Event", event_name)
 	if event.carrier_status != "shipped" or not event.sales_order:
 		return None

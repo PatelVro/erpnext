@@ -11,6 +11,9 @@ from frappe import _
 
 @frappe.whitelist()
 def create_invoice_for_delivery(delivery_note):
+	from canadian_outlet.co_core.safe_mode import assert_not_safe_mode
+
+	assert_not_safe_mode("invoicing")
 	dn = frappe.get_doc("Delivery Note", delivery_note)
 
 	if dn.docstatus != 1:

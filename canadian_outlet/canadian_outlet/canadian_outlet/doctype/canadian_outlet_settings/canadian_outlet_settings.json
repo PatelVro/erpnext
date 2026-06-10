@@ -10,7 +10,9 @@
   "deduct_on_shipped_event",
   "auto_invoice_on_shipment",
   "marketplace_tax_account",
-  "fba_warehouse"
+  "fba_warehouse",
+  "notification_email",
+  "safe_mode"
  ],
  "fields": [
   {
@@ -61,11 +63,25 @@
    "fieldtype": "Link",
    "label": "FBA Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "description": "Receives STOP emails, the daily review digest, and 3-day escalations (C7, D6). Unset = no emails; the queues remain in the desk.",
+   "fieldname": "notification_email",
+   "fieldtype": "Data",
+   "label": "Notification Email",
+   "options": "Email"
+  },
+  {
+   "default": "0",
+   "description": "C8/INV-13 (owner's D10-3b): freezes everything that touches stock or money \u2014 automatic and one-click alike \u2014 while intake continues with every order quarantined. Nothing is lost; nothing moves until this is turned off.",
+   "fieldname": "safe_mode",
+   "fieldtype": "Check",
+   "label": "SAFE MODE (Big Red Button)"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-10 15:00:00.000000",
+ "modified": "2026-06-10 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Canadian Outlet",
  "name": "Canadian Outlet Settings",

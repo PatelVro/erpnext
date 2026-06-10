@@ -111,6 +111,12 @@ def import_order(order):
 		_validate_envelope(channel_order_id, order)
 		resolved_lines = _resolve_lines(channel, order)
 		fulfillment_type = _classify(channel, order)
+		from canadian_outlet.co_core.safe_mode import is_safe_mode
+
+		if is_safe_mode():
+			# INV-13 (C8): intake continues, but EVERYTHING arrives
+			# quarantined — no holds, no FBA issues, no money.
+			fulfillment_type = None
 		customer = _resolve_customer(channel)
 		sales_order = _create_sales_order(
 			channel, channel_order_id, order, resolved_lines, fulfillment_type, customer
@@ -345,6 +351,11 @@ def _handle_channel_cancellation(channel, channel_order_id, sales_order, order, 
 	order, which releases its hold natively. After ship it STOPS for human
 	review (goods and money both in motion). Idempotent: an already-cancelled
 	order is a no-op. Returns an Integration Exception name for the STOP case."""
+	from canadian_outlet.co_core.safe_mode import is_safe_mode
+
+	if is_safe_mode():
+		return None  # INV-13: no automatic document changes in safe mode
+
 	docstatus = frappe.db.get_value("Sales Order", sales_order, "docstatus")
 	if docstatus != 1:
 		return None  # draft or already cancelled — nothing to release

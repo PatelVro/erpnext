@@ -11,6 +11,9 @@ from frappe import _
 @frappe.whitelist()
 def record_payment_for_invoice(sales_invoice, bank_account=None, reference_no=None,
 		reference_date=None):
+	from canadian_outlet.co_core.safe_mode import assert_not_safe_mode
+
+	assert_not_safe_mode("recording payments")
 	invoice = frappe.get_doc("Sales Invoice", sales_invoice)
 
 	if invoice.docstatus != 1:

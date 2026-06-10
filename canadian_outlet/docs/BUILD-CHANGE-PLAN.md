@@ -14,8 +14,8 @@ and risk — stock-safety primitives first, conveniences later.
 | C4 ✅ LANDED | **Suggest-and-confirm + bulk mapping import + fix-and-flow** — suggestion list on unknown-SKU tickets; Excel/CSV mapping importer with row-level validation report; confirming a mapping auto-replays all waiting orders | D2, D8 | Strict block, manual replay button |
 | C5 ✅ LANDED | **Auto-invoice at shipment + per-order taxes** — invoice created on the deduction heartbeat behind new switch ④ (manual-first); adapters carry per-order tax detail; marketplace-remitted vs self-remitted distinguishable | D9, D10 | Manual invoice button; taxes not carried |
 | C6 ✅ LANDED (sent-vs-received report pending real receipt data) | **At-FBA location** — "At Amazon FBA" warehouse; transfer recording tagged with Inbound Shipment ID; sent-vs-received report; FBA orders deduct At-FBA; true-up tool; WFS stays informational (OPEN) | D4 | FBA never modeled; FBA orders touch nothing |
-| C7 | **Notifications** — instant email per STOP, daily WARN digest, 3-day louder escalation; system-health WARN list for sync failures | D6 | None |
-| C8 | **Kill-switch completion** — switch ④ (invoice) and the BIG RED safe-mode: stock+money frozen, intake continues into quarantine | D10 | Switches ①–③ exist; no safe-mode |
+| C7 ✅ LANDED | **Notifications** — instant email per STOP, daily WARN digest, 3-day louder escalation; system-health WARN list for sync failures | D6 | None |
+| C8 ✅ LANDED | **Kill-switch completion** — switch ④ (invoice) and the BIG RED safe-mode: stock+money frozen, intake continues into quarantine | D10 | Switches ①–③ exist; no safe-mode |
 | C9 | **Payment/settlement reconciliation (early)** — match Stripe/Klarna/Affirm/E-Transfer payouts and marketplace settlements to invoices; human confirms postings initially | D9, D10 | Read-only Amazon matching only |
 | C10 | **Product-360 view** — per-Item: stock, cost, purchase history, sales trend, listed/selling per channel, refill hint | D4 | Partial (reorder + listing-health reports) |
 

@@ -16,6 +16,9 @@ def classify_quarantined_order(sales_order, fulfillment_type):
 		frappe.throw(_("Fulfillment type must be one of {0}").format(
 			", ".join(VALID_FULFILLMENT_TYPES)))
 
+	from canadian_outlet.co_core.safe_mode import assert_not_safe_mode
+
+	assert_not_safe_mode("releasing quarantined orders")
 	so = frappe.get_doc("Sales Order", sales_order)
 	if not so.co_quarantined or so.docstatus != 0:
 		frappe.throw(_("{0} is not a quarantined order").format(so.name))

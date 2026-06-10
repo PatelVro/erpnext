@@ -139,6 +139,14 @@ manual replay) must not duplicate any record or effect.
   Orders already cancelled on arrival still import (every order exists, D1)
   and hold nothing.
 
+## INV-13 — Safe mode, the big red button (C8, FLOW-DECISIONS D10-3b)
+
+- When `Canadian Outlet Settings.safe_mode` is ON: no process in this app —
+  automatic or one-click — may create or submit any stock- or money-impacting
+  document. Intake CONTINUES with every order arriving quarantined, so
+  nothing is ever lost during a scare; nothing moves until a human turns the
+  switch off.
+
 ---
 
 ## Explicitly out of scope until separately approved
