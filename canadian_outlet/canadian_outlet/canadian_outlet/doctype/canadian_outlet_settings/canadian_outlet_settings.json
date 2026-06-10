@@ -6,7 +6,8 @@
  "field_order": [
   "imports_enabled",
   "default_warehouse",
-  "auto_submit_delivery_note_on_shipped"
+  "auto_submit_delivery_note_on_shipped",
+  "marketplace_fulfillment_supplier"
  ],
  "fields": [
   {
@@ -29,11 +30,18 @@
    "fieldname": "auto_submit_delivery_note_on_shipped",
    "fieldtype": "Check",
    "label": "Auto-Submit Delivery Note on Shipped Event"
+  },
+  {
+   "description": "Set on FBA/WFS order lines as the drop-ship fulfiller (INV-7): marketplace-fulfilled rows hold no shelf stock and map to no Delivery Note. Required before FBA/WFS orders can import (fail closed).",
+   "fieldname": "marketplace_fulfillment_supplier",
+   "fieldtype": "Link",
+   "label": "Marketplace Fulfillment Supplier",
+   "options": "Supplier"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-10 00:00:00.000000",
+ "modified": "2026-06-10 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Canadian Outlet",
  "name": "Canadian Outlet Settings",

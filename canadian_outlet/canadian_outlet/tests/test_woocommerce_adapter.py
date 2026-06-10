@@ -80,7 +80,7 @@ class TestWooCommerceAdapter(FrappeTestCase):
 		sales_orders = utils.get_sales_orders(CHANNEL, "7001")
 		self.assertEqual(len(sales_orders), 1)
 		self.assertEqual(sales_orders[0].co_fulfillment_type, "SELF")
-		self.assertEqual(sales_orders[0].docstatus, 0)
+		self.assertEqual(sales_orders[0].docstatus, 1)  # C1: submitted on arrival
 
 	def test_end_to_end_unknown_sku_fails_closed(self):
 		from canadian_outlet.co_orders.adapters.woocommerce import (

@@ -96,9 +96,14 @@ def import_order(order):
 	# below for the concurrent case this check alone cannot catch.
 	existing = _find_existing_sales_order(channel, channel_order_id)
 	if existing:
+		exception_name = None
+		if order.get("cancelled"):
+			exception_name = _handle_channel_cancellation(channel, channel_order_id,
+				existing, order, payload_hash)
 		_write_log(channel, log_order_id, import_key, "Duplicate", payload_hash,
-			sales_order=existing)
-		return ImportResult("Duplicate", sales_order=existing)
+			sales_order=existing, integration_exception=exception_name)
+		return ImportResult("Duplicate", sales_order=existing,
+			integration_exception=exception_name)
 
 	frappe.db.savepoint(SAVEPOINT)
 	try:
@@ -221,8 +226,25 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 	# Sales Order itself — a Sales Order never moves stock. FBA/WFS orders
 	# carry no local warehouse reference (INV-7).
 	warehouse = None
+	fulfillment_supplier = None
 	if fulfillment_type == "SELF":
 		warehouse = frappe.db.get_single_value("Canadian Outlet Settings", "default_warehouse")
+	else:
+		# INV-7: FBA/WFS lines are DROP-SHIP rows (delivered_by_supplier) —
+		# ERPNext excludes them from shelf reservation and from Delivery Note
+		# mapping, and demands no warehouse. ERPNext would otherwise auto-fill
+		# item-default warehouses and reserve shelf stock for marketplace-
+		# fulfilled orders (caught by test_fba_import_holds_nothing). The
+		# fulfilling Supplier is operator-configured; absent → fail closed.
+		fulfillment_supplier = frappe.db.get_single_value(
+			"Canadian Outlet Settings", "marketplace_fulfillment_supplier"
+		)
+		if not fulfillment_supplier:
+			raise _ImportBlocked(
+				"Creation",
+				"Canadian Outlet Settings: marketplace_fulfillment_supplier is not set "
+				"— required for FBA/WFS orders (INV-7)",
+			)
 	doc = frappe.get_doc(
 		{
 			"doctype": "Sales Order",
@@ -241,19 +263,58 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 					"rate": line["rate"],
 					"delivery_date": delivery_date,
 					"warehouse": warehouse,
+					"delivered_by_supplier": 0 if fulfillment_type == "SELF" else 1,
+					"supplier": fulfillment_supplier,
 				}
 				for line in resolved_lines
 			],
 		}
 	)
 	try:
-		# Draft only (docstatus 0): no submission, no stock impact (INV-8).
 		doc.insert(ignore_permissions=True)
+		# C1 (FLOW-DECISIONS D5, INV-12): a marketplace order is confirmed by
+		# definition, so it is submitted on arrival. Submission is NOT a stock
+		# movement (INV-8) — it places the availability HOLD: SELF lines carry
+		# the warehouse and raise Bin.reserved_qty; FBA/WFS lines carry none
+		# and hold nothing (INV-7). Cancelling the order releases the hold.
+		doc.submit()
+		if order.get("cancelled"):
+			# Cancelled before we ever saw it: the per-order record must
+			# still exist (D1), but it holds nothing.
+			doc.cancel()
 	except Exception as err:
 		if _is_channel_order_unique_violation(err):
 			raise _RaceDuplicate()
 		raise _ImportBlocked("Creation", scrub_secrets(str(err)))
 	return doc.name
+
+
+def _has_submitted_delivery(sales_order):
+	return bool(frappe.get_all(
+		"Delivery Note Item",
+		filters={"against_sales_order": sales_order, "docstatus": 1},
+		limit=1,
+	))
+
+
+def _handle_channel_cancellation(channel, channel_order_id, sales_order, order, payload_hash):
+	"""FLOW-DECISIONS D6: cancellation before ship is SILENT — cancel the
+	order, which releases its hold natively. After ship it STOPS for human
+	review (goods and money both in motion). Idempotent: an already-cancelled
+	order is a no-op. Returns an Integration Exception name for the STOP case."""
+	docstatus = frappe.db.get_value("Sales Order", sales_order, "docstatus")
+	if docstatus != 1:
+		return None  # draft or already cancelled — nothing to release
+
+	if _has_submitted_delivery(sales_order):
+		blocked = _ImportBlocked(
+			"Cancellation",
+			f"Channel cancelled {channel_order_id} after shipment — return/dispute review needed",
+		)
+		return _record_exception(channel, channel_order_id, order, blocked, payload_hash)
+
+	frappe.get_doc("Sales Order", sales_order).cancel()
+	return None
 
 
 def _is_channel_order_unique_violation(err):

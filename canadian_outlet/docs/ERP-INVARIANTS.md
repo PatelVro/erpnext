@@ -124,6 +124,19 @@ manual replay) must not duplicate any record or effect.
   the same cause result in exactly one open Integration Exception (subsequent
   occurrences update/annotate it, not duplicate it).
 
+## INV-12 — Availability honesty (C1, FLOW-DECISIONS D5)
+
+- Imported orders are **submitted on arrival** — a marketplace order is a
+  confirmed sale. Submission is not a stock movement (INV-8 stands): it places
+  the HOLD, via the native reserved quantity of submitted Sales Orders.
+- A SELF order's units are unavailable from the moment of import; the physical
+  count does not change until shipping (INV-8). FBA/WFS lines carry no local
+  warehouse and hold nothing (INV-7).
+- Channel cancellation before shipping cancels the order and releases its hold
+  silently; after shipping it stops for human review (stage: Cancellation).
+  Orders already cancelled on arrival still import (every order exists, D1)
+  and hold nothing.
+
 ---
 
 ## Explicitly out of scope until separately approved

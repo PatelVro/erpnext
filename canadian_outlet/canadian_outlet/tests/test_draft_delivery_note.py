@@ -28,9 +28,8 @@ class TestDraftDeliveryNote(FrappeTestCase):
 				evidence=evidence,
 			)
 		)
-		so = frappe.get_doc("Sales Order", result.sales_order)
-		so.submit()  # the human review step
-		return so
+		# C1: imported orders arrive submitted (the hold) — no human submit.
+		return frappe.get_doc("Sales Order", result.sales_order)
 
 	def test_self_order_gets_draft_only(self):
 		from canadian_outlet.co_inventory.delivery_note_service import create_draft_delivery_note
@@ -65,19 +64,31 @@ class TestDraftDeliveryNote(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, create_draft_delivery_note, so.name)
 
 	def test_draft_sales_order_is_refused(self):
-		from canadian_outlet.co_orders.import_service import import_order
+		# Imports arrive submitted (C1), so the draft case is a manual order.
 		from canadian_outlet.co_inventory.delivery_note_service import create_draft_delivery_note
 
-		utils.make_listing(CHANNEL, "EXT-SKU-ORD-DN4")
-		result = import_order(
-			utils.make_order(
-				CHANNEL,
-				"ORD-DN4",
-				lines=[{"external_identity": "EXT-SKU-ORD-DN4", "qty": 1, "rate": 5}],
-				evidence=dict(utils.AMAZON_MFN_EVIDENCE),
-			)
-		)
-		self.assertRaises(frappe.ValidationError, create_draft_delivery_note, result.sales_order)
+		so = frappe.get_doc(
+			{
+				"doctype": "Sales Order",
+				"customer": utils.TEST_CUSTOMER,
+				"company": utils.TEST_COMPANY,
+				"currency": utils.company_currency(),
+				"selling_price_list": "_Test Price List",
+				"transaction_date": frappe.utils.nowdate(),
+				"delivery_date": frappe.utils.nowdate(),
+				"co_fulfillment_type": "SELF",
+				"items": [
+					{
+						"item_code": utils.TEST_ITEM,
+						"qty": 1,
+						"rate": 5,
+						"delivery_date": frappe.utils.nowdate(),
+					}
+				],
+			}
+		).insert()
+		self.assertEqual(so.docstatus, 0)
+		self.assertRaises(frappe.ValidationError, create_draft_delivery_note, so.name)
 
 # Frappe test runner: create ERPNext standard test records first.
 test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

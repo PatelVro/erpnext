@@ -31,6 +31,7 @@ def translate_order(channel, payload):
 		"channel_order_id": str(payload.get("id")),
 		"order_timestamp": payload.get("date_created_gmt") or payload.get("date_created"),
 		"channel_status": payload.get("status"),
+		"cancelled": payload.get("status") in ("cancelled", "refunded", "failed", "trash"),
 		"currency": payload.get("currency"),
 		"totals": payload.get("total"),
 		"tax_total": payload.get("total_tax"),

@@ -48,10 +48,8 @@ Spelled out:
 ## 3. V1 SELF order flow
 
 ```
-Sales Order (created by Order Import Service, co_fulfillment_type = SELF)
-        │
-        ▼  human reviews order
-Sales Order submitted (human)
+Sales Order (created AND submitted by the Order Import Service — C1/INV-12:
+             submission is the availability hold, not a stock movement)
         │
         ▼  human creates Delivery Note from Sales Order (standard ERPNext flow)
 Delivery Note (draft)            ← no stock impact (INV-8)

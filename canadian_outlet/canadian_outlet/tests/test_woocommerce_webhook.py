@@ -79,7 +79,7 @@ class TestWooCommerceWebhook(FrappeTestCase):
 		sales_orders = utils.get_sales_orders(CHANNEL, "8003")
 		self.assertEqual(len(sales_orders), 1)
 		self.assertEqual(sales_orders[0].co_fulfillment_type, "SELF")
-		self.assertEqual(sales_orders[0].docstatus, 0)
+		self.assertEqual(sales_orders[0].docstatus, 1)  # C1: submitted on arrival
 
 	def test_duplicate_webhook_is_idempotent(self):
 		from canadian_outlet.co_orders.adapters.woocommerce import handle_webhook

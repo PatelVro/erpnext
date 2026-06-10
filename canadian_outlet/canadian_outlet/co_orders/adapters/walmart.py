@@ -27,6 +27,7 @@ def translate_order(channel, payload):
 		"channel_order_id": str(payload.get("purchaseOrderId") or ""),
 		"order_timestamp": str(payload.get("orderDate") or ""),
 		"channel_status": _first_line_status(order_lines),
+		"cancelled": _first_line_status(order_lines) == "Cancelled",
 		"currency": _currency(order_lines),
 		"evidence": {EVIDENCE_KEY: (payload.get("shipNode") or {}).get("type") or ""},
 		"lines": [

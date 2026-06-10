@@ -109,7 +109,7 @@ class TestStockSafety(FrappeTestCase):
 
 		sales_orders = utils.get_sales_orders(CHANNEL, "ORD-STK4")
 		self.assertEqual(sales_orders[0].co_fulfillment_type, "SELF")
-		self.assertEqual(sales_orders[0].docstatus, 0)
+		self.assertEqual(sales_orders[0].docstatus, 1)  # C1: submitted on arrival
 		self.assertEqual(_stock_documents_for_order(sales_orders[0].name), [])
 		self.assertEqual(frappe.db.count("Stock Entry"), stock_entry_count_before)
 		self.assertEqual(frappe.db.count("Delivery Note"), delivery_note_count_before)

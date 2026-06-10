@@ -48,8 +48,7 @@ class TestAutoSubmitDeliveryNote(FrappeTestCase):
 		self.assertTrue(warehouse)  # SELF orders inherit Settings.default_warehouse
 		make_stock_entry(item_code=utils.TEST_ITEM, target=warehouse, qty=20, basic_rate=1,
 			company=so.company)
-		so.submit()
-		dn_name = create_draft_delivery_note(so.name)
+		dn_name = create_draft_delivery_note(so.name)  # C1: SO arrives submitted
 		return so, dn_name
 
 	def _record_shipped(self, order_id, tracking="TRACK-AUTO-1"):

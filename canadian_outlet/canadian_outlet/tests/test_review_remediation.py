@@ -214,8 +214,7 @@ class TestAutoSubmitFailurePath(FrappeTestCase):
 			)
 		)
 		so = frappe.get_doc("Sales Order", result.sales_order)
-		so.submit()
-		dn_name = create_draft_delivery_note(so.name)  # no stock provided
+		dn_name = create_draft_delivery_note(so.name)  # C1: SO arrives submitted  # no stock provided
 
 		error_logs_before = frappe.db.count("Error Log")
 		# The test site allows negative stock (ERPNext test bootstrap), so a

@@ -114,6 +114,19 @@ def make_order(channel, channel_order_id, lines=None, evidence=None, **overrides
 	return order
 
 
+def ensure_fulfillment_supplier():
+	name = "CO Marketplace Fulfilled"
+	if not frappe.db.exists("Supplier", name):
+		frappe.get_doc(
+			{
+				"doctype": "Supplier",
+				"supplier_name": name,
+				"supplier_group": frappe.db.get_value("Supplier Group", {"is_group": 0}),
+			}
+		).insert(ignore_permissions=True)
+	return name
+
+
 def enable_imports(default_warehouse=None):
 	if default_warehouse is None:
 		# SELF Sales Orders inherit this warehouse, and ERPNext requires it to
@@ -124,6 +137,9 @@ def enable_imports(default_warehouse=None):
 		)
 	frappe.db.set_single_value("Canadian Outlet Settings", "imports_enabled", 1)
 	frappe.db.set_single_value("Canadian Outlet Settings", "default_warehouse", default_warehouse)
+	frappe.db.set_single_value(
+		"Canadian Outlet Settings", "marketplace_fulfillment_supplier", ensure_fulfillment_supplier()
+	)
 
 
 def disable_imports():

@@ -32,6 +32,7 @@ def translate_order(channel, payload, order_items):
 		"channel_order_id": str(payload.get("AmazonOrderId") or ""),
 		"order_timestamp": payload.get("PurchaseDate"),
 		"channel_status": payload.get("OrderStatus"),
+		"cancelled": payload.get("OrderStatus") == "Canceled",
 		"currency": (payload.get("OrderTotal") or {}).get("CurrencyCode"),
 		"totals": (payload.get("OrderTotal") or {}).get("Amount"),
 		"evidence": {EVIDENCE_KEY: payload.get("FulfillmentChannel") or ""},

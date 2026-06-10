@@ -43,7 +43,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Failure Stage",
-   "options": "Resolution\nClassification\nCustomer\nCreation\nReplay",
+   "options": "Resolution\nClassification\nCustomer\nCreation\nReplay\nCancellation",
    "reqd": 1
   },
   {

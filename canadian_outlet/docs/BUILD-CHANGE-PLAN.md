@@ -8,7 +8,7 @@ and risk — stock-safety primitives first, conveniences later.
 
 | # | Change | Decision | What it replaces in the current build |
 |---|---|---|---|
-| C1 | **Stock holds at import** — SELF order import places a reservation (shelf unchanged, availability down); cancellation-before-ship auto-releases; quarantined orders never hold | D5, D6 | Nothing reserves today |
+| C1 ✅ LANDED | **Stock holds at import** — SELF order import places a reservation (shelf unchanged, availability down); cancellation-before-ship auto-releases; quarantined orders never hold | D5, D6 | Nothing reserves today |
 | C2 | **Per-shipment deduction at shipped status** — shipped/completed event converts the hold to a real deduction box-by-box; label-creation and voids inert; behind switch ③, manual-first at launch | D5, D7, D10 | Kill-switched whole-order draft-DN auto-submit |
 | C3 | **Quarantine intake** — unclear fulfillment creates a real, flagged Sales Order barred from stock/shipping/invoicing; classify action releases it; INV-6 rewritten accordingly | D3 | Unclear → exception ticket, no order |
 | C4 | **Suggest-and-confirm + bulk mapping import + fix-and-flow** — suggestion list on unknown-SKU tickets; Excel/CSV mapping importer with row-level validation report; confirming a mapping auto-replays all waiting orders | D2, D8 | Strict block, manual replay button |

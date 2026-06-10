@@ -78,7 +78,7 @@ The fail-closed landing zone (INV-4, INV-10) and replay anchor.
 |---|---|---|
 | channel | Link Channel | |
 | channel_order_id | Data | When order-scoped |
-| failure_stage | Select: Resolution / Classification / Customer / Creation / Replay | Pipeline step that stopped |
+| failure_stage | Select: Resolution / Classification / Customer / Creation / Replay / Cancellation | Pipeline step that stopped; Cancellation = channel cancelled after shipment (C1) |
 | failure_reason | Small Text | Human-readable; never contains secrets |
 | external_identity | Data | For resolution failures |
 | status | Select: **Open / In Review / Resolved / Ignored / Failed Replay** | The complete status set — no other value exists |

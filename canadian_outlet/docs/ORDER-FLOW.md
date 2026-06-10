@@ -37,8 +37,10 @@ Order Import Service  (the only entry point — INV-9)
   4. Classify fulfillment via Channel Fulfillment Map (INV-5)
        result UNKNOWN → Integration Exception, stop (INV-6, INV-10)
   5. Resolve/create Customer per the customer policy (§4)
-  6. Create Sales Order (atomic: all lines or nothing — INV-10)
+  6. Create AND SUBMIT Sales Order (atomic: all lines or nothing — INV-10)
        set co_sales_channel, co_channel_order_id, co_fulfillment_type
+       submission places the availability HOLD (INV-12, C1); SELF lines carry
+       the default warehouse; channel-cancelled orders are cancelled in place
   7. Mark Order Import Log entry with outcome
         │
         ├── success → Sales Order (draft, standard ERPNext lifecycle)
@@ -96,8 +98,8 @@ retention policy (Phase 1.5) must cover the Customer master too.
 - Never guesses a fulfillment type (INV-5); never writes UNKNOWN or blank to
   `co_fulfillment_type` (INV-6).
 - Never creates a partial Sales Order (INV-10).
-- Never submits the Sales Order automatically, and never creates or submits any
-  stock-impacting document (V1 scope; see `docs/STOCK-FLOW.md`).
+- Submits the Sales Order on arrival (C1/INV-12 — the hold), but never creates
+  or submits any stock-impacting document; holds are not deductions (INV-8).
 - Never stores full raw payloads (see payload/PII rules in `docs/DATA-MODEL.md`).
 
 ## 6. V1 scope boundaries
