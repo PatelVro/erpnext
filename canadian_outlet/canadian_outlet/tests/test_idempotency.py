@@ -73,18 +73,17 @@ class TestIdempotency(FrappeTestCase):
 		failed = import_order(order)
 		self.assertEqual(failed.outcome, "Exception")
 
-		# Human fixes the cause and marks the exception Resolved.
+		# Human fixes the cause: C4 fix-and-flow imports the stuck order the
+		# moment the mapping exists and resolves the exception itself.
 		utils.make_listing(CHANNEL, "EXT-SKU-IDEM4")
-		exc = frappe.get_doc("Integration Exception", failed.integration_exception)
-		exc.status = "Resolved"
-		exc.save()
-
-		# Replay re-enters the pipeline like any other delivery.
-		replay = import_order(order)
-		self.assertEqual(replay.outcome, "Created")
 		self.assertEqual(len(utils.get_sales_orders(CHANNEL, "ORD-IDEM4")), 1)
-		exc.reload()
+		exc = frappe.get_doc("Integration Exception", failed.integration_exception)
 		self.assertEqual(exc.status, "Resolved")
+
+		# Re-delivery after the fix is a no-op duplicate (INV-11A).
+		replay = import_order(order)
+		self.assertEqual(replay.outcome, "Duplicate")
+		self.assertEqual(len(utils.get_sales_orders(CHANNEL, "ORD-IDEM4")), 1)
 
 		# Replaying again is a no-op duplicate.
 		again = import_order(order)

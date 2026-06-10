@@ -31,16 +31,15 @@ class TestReplay(FrappeTestCase):
 		from canadian_outlet.co_orders.replay import replay_exception
 
 		exc_name = self._fail_order("ORD-RPL1")
+		# C4 fix-and-flow: creating the mapping imports the order immediately
+		# and resolves the exception — no manual replay needed.
 		utils.make_listing(CHANNEL, "EXT-SKU-ORD-RPL1")
-
-		result = replay_exception(exc_name)
-		self.assertEqual(result["outcome"], "Created")
 		self.assertEqual(len(utils.get_sales_orders(CHANNEL, "ORD-RPL1")), 1)
 		self.assertEqual(frappe.db.get_value("Integration Exception", exc_name, "status"), "Resolved")
 
-		# Replaying again is a no-op duplicate; still exactly one Sales Order.
-		again = replay_exception(exc_name)
-		self.assertEqual(again["outcome"], "Duplicate")
+		# Manual replay remains available and is a safe no-op duplicate.
+		result = replay_exception(exc_name)
+		self.assertEqual(result["outcome"], "Duplicate")
 		self.assertEqual(len(utils.get_sales_orders(CHANNEL, "ORD-RPL1")), 1)
 
 	def test_replay_failing_again_after_resolved_marks_failed_replay(self):
