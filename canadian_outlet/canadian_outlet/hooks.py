@@ -7,6 +7,11 @@ app_license = "Proprietary"
 
 required_apps = ["erpnext"]
 
+# Schema guarantees that must exist on FRESH installs too (patches are marked
+# completed on fresh installs, so they cannot be the only mechanism). Runs
+# after fixtures on install and migrate.
+after_sync = ["canadian_outlet.install.after_sync"]
+
 # Phase 29: desk client scripts — plain JS served from public/, no build step
 # (the old repo's CDN-React frontend stays retired). Buttons only call the
 # same whitelisted services used from the console; no business logic in JS.
