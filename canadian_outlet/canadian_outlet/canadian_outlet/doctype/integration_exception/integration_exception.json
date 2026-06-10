@@ -47,7 +47,7 @@
    "reqd": 1
   },
   {
-   "description": "Human-readable. Never contains secrets (docs/CONFIGURATION.md §5) or PII (docs/PRIVACY-REDACTION.md §4).",
+   "description": "Human-readable. Never contains secrets (docs/CONFIGURATION.md \u00a75) or PII (docs/PRIVACY-REDACTION.md \u00a74).",
    "fieldname": "failure_reason",
    "fieldtype": "Small Text",
    "label": "Failure Reason"
@@ -64,7 +64,7 @@
   },
   {
    "default": "Open",
-   "description": "Resolved means the cause is fixed; the order is imported only when replay succeeds (docs/DATA-MODEL.md §5).",
+   "description": "Resolved means the cause is fixed; the order is imported only when replay succeeds (docs/DATA-MODEL.md \u00a75).",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -80,7 +80,7 @@
    "mandatory_depends_on": "eval:doc.status=='Ignored'"
   },
   {
-   "description": "Set when status becomes terminal; drives the retention purge (docs/PRIVACY-REDACTION.md §5).",
+   "description": "Set when status becomes terminal; drives the retention purge (docs/PRIVACY-REDACTION.md \u00a75).",
    "fieldname": "resolved_or_ignored_on",
    "fieldtype": "Datetime",
    "label": "Resolved/Ignored On",
@@ -99,7 +99,7 @@
    "label": "Payload (per docs/PRIVACY-REDACTION.md)"
   },
   {
-   "description": "Hash of (channel, channel_order_id, failure_stage, cause) — enforces INV-11C.",
+   "description": "Hash of (channel, channel_order_id, failure_stage, cause) \u2014 enforces INV-11C.",
    "fieldname": "dedup_key",
    "fieldtype": "Data",
    "label": "Dedup Key",
@@ -146,6 +146,16 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Canadian Outlet Operations",
    "share": 1,
    "write": 1
   }

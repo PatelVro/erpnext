@@ -33,7 +33,7 @@
    "search_index": 1
   },
   {
-   "description": "Resolved via (co_sales_channel, co_channel_order_id); empty when no matching order exists. Recording an event NEVER touches stock or document status (INV-8, docs/STOCK-FLOW.md §4).",
+   "description": "Resolved via (co_sales_channel, co_channel_order_id); empty when no matching order exists. Recording an event NEVER touches stock or document status (INV-8, docs/STOCK-FLOW.md \u00a74).",
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "label": "Sales Order",
@@ -68,7 +68,7 @@
    "label": "Source"
   },
   {
-   "description": "Duplicate events are idempotent on this hash (docs/DATA-MODEL.md §7A).",
+   "description": "Duplicate events are idempotent on this hash (docs/DATA-MODEL.md \u00a77A).",
    "fieldname": "event_hash",
    "fieldtype": "Data",
    "label": "Event Hash",
@@ -92,6 +92,15 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Canadian Outlet Operations",
    "share": 1
   }
  ],

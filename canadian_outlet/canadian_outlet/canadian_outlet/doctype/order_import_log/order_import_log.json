@@ -30,7 +30,7 @@
    "reqd": 1
   },
   {
-   "description": "channel + channel_order_id (INV-11A key). Not unique: the log records every attempt; enforcement lives on Sales Order (docs/DATA-MODEL.md §4/§7).",
+   "description": "channel + channel_order_id (INV-11A key). Not unique: the log records every attempt; enforcement lives on Sales Order (docs/DATA-MODEL.md \u00a74/\u00a77).",
    "fieldname": "import_key",
    "fieldtype": "Data",
    "label": "Import Key",
@@ -58,7 +58,7 @@
    "options": "Integration Exception"
   },
   {
-   "description": "Hash only — the log stores no payload copies (docs/PRIVACY-REDACTION.md §5).",
+   "description": "Hash only \u2014 the log stores no payload copies (docs/PRIVACY-REDACTION.md \u00a75).",
    "fieldname": "payload_hash",
    "fieldtype": "Data",
    "label": "Payload Hash"
@@ -80,6 +80,15 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Canadian Outlet Operations",
    "share": 1
   }
  ],

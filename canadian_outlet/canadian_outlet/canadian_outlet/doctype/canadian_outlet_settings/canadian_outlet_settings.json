@@ -17,7 +17,7 @@
    "label": "Imports Enabled"
   },
   {
-   "description": "The single physical warehouse (docs/STOCK-FLOW.md §1 — provisional: 1431 Yonge). SELF Sales Orders inherit this warehouse on their items.",
+   "description": "The single physical warehouse (docs/STOCK-FLOW.md \u00a71 \u2014 provisional: 1431 Yonge). SELF Sales Orders inherit this warehouse on their items.",
    "fieldname": "default_warehouse",
    "fieldtype": "Link",
    "label": "Default Warehouse",
@@ -25,7 +25,7 @@
   },
   {
    "default": "0",
-   "description": "STOCK-FLOW §5 upgrade kill switch. When ON, a recorded ShipStation 'shipped' event submits the EXISTING draft Delivery Note of the matching SELF order (never creates one). Off by default: submission stays human.",
+   "description": "STOCK-FLOW \u00a75 upgrade kill switch. When ON, a recorded ShipStation 'shipped' event submits the EXISTING draft Delivery Note of the matching SELF order (never creates one). Off by default: submission stays human.",
    "fieldname": "auto_submit_delivery_note_on_shipped",
    "fieldtype": "Check",
    "label": "Auto-Submit Delivery Note on Shipped Event"
@@ -48,6 +48,15 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Canadian Outlet Operations",
+   "share": 1
   }
  ],
  "sort_field": "modified",

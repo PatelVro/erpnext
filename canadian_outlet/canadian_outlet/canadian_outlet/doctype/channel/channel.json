@@ -36,7 +36,7 @@
    "label": "Enabled"
   },
   {
-   "description": "Used under the generic-customer policy (docs/ORDER-FLOW.md §4).",
+   "description": "Used under the generic-customer policy (docs/ORDER-FLOW.md \u00a74).",
    "fieldname": "default_customer",
    "fieldtype": "Link",
    "label": "Default Customer",
@@ -62,6 +62,15 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Canadian Outlet Operations",
+   "share": 1
   }
  ],
  "sort_field": "modified",

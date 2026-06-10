@@ -1,0 +1,1 @@
+canadian_outlet.patches.create_operations_role
