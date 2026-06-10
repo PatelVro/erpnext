@@ -7,6 +7,17 @@ app_license = "Proprietary"
 
 required_apps = ["erpnext"]
 
+# Phase 29: desk client scripts — plain JS served from public/, no build step
+# (the old repo's CDN-React frontend stays retired). Buttons only call the
+# same whitelisted services used from the console; no business logic in JS.
+doctype_js = {
+	"Integration Exception": "public/js/integration_exception.js",
+	"Sales Order": "public/js/sales_order.js",
+}
+doctype_list_js = {
+	"Integration Exception": "public/js/integration_exception_list.js",
+}
+
 # Phase 6: Sales Order custom fields shipped as fixtures (docs/DATA-MODEL.md §8).
 # Filtered to exactly the three approved co_ fields — never a blanket export.
 fixtures = [
