@@ -66,10 +66,10 @@ loosening either is a one-line change here plus a fixture/test update.
 ## 6. Purge mechanics — constraint
 
 Automated purging would require a **scheduled job, which is not approved**
-(AGENTS.md scope gates). Until a purge job is explicitly scoped in a later
-phase, retention is enforced operationally (manual purge procedure, documented
-at go-live). The data model must still record enough to purge correctly
-(terminal-status timestamp).
+(AGENTS.md scope gates). Retention is enforced by the operator-invoked
+`canadian_outlet.co_core.retention.purge_expired_payload_copies()` run on a
+calendar reminder (docs/OPERATIONS.md §6). The data model records the
+terminal-status timestamp (`resolved_or_ignored_on`) the purge computes from.
 
 ## 7. Enforcement
 
