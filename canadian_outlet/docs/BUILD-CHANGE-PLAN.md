@@ -16,8 +16,8 @@ and risk — stock-safety primitives first, conveniences later.
 | C6 ✅ LANDED (sent-vs-received report pending real receipt data) | **At-FBA location** — "At Amazon FBA" warehouse; transfer recording tagged with Inbound Shipment ID; sent-vs-received report; FBA orders deduct At-FBA; true-up tool; WFS stays informational (OPEN) | D4 | FBA never modeled; FBA orders touch nothing |
 | C7 ✅ LANDED | **Notifications** — instant email per STOP, daily WARN digest, 3-day louder escalation; system-health WARN list for sync failures | D6 | None |
 | C8 ✅ LANDED | **Kill-switch completion** — switch ④ (invoice) and the BIG RED safe-mode: stock+money frozen, intake continues into quarantine | D10 | Switches ①–③ exist; no safe-mode |
-| C9 | **Payment/settlement reconciliation (early)** — match Stripe/Klarna/Affirm/E-Transfer payouts and marketplace settlements to invoices; human confirms postings initially | D9, D10 | Read-only Amazon matching only |
-| C10 | **Product-360 view** — per-Item: stock, cost, purchase history, sales trend, listed/selling per channel, refill hint | D4 | Partial (reorder + listing-health reports) |
+| C9 ✅ LANDED (marketplace settlements → draft PEs; processor-file ingestion parked pending real files) | **Payment/settlement reconciliation (early)** — match Stripe/Klarna/Affirm/E-Transfer payouts and marketplace settlements to invoices; human confirms postings initially | D9, D10 | Read-only Amazon matching only |
+| C10 ✅ LANDED | **Product-360 view** — per-Item: stock, cost, purchase history, sales trend, listed/selling per channel, refill hint | D4 | Partial (reorder + listing-health reports) |
 
 ## Invariant updates carried by these phases
 
