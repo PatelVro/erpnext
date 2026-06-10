@@ -3,6 +3,12 @@
 Status: Phase 1 planning document. Normative once approved.
 Governing invariants: INV-2, INV-3, INV-4, INV-5, INV-6, INV-9, INV-10, INV-11.
 
+> **Precedence note (2026-06-10):** the owner's workflow decisions in
+> `docs/FLOW-DECISIONS.md` are the top business authority. Sections of this
+> document that conflict with it are superseded; each implementation phase of
+> `docs/BUILD-CHANGE-PLAN.md` rewrites the affected sections here in the same
+> change.
+
 This document defines the single pipeline by which external marketplace orders
 become ERPNext Sales Orders. There is exactly one pipeline (INV-9); channel
 adapters differ only in how they fetch and translate payloads into the common

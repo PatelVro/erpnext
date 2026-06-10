@@ -3,6 +3,12 @@
 Status: Phase 1 planning document. Normative once approved.
 Governing invariants: INV-7, INV-8.
 
+> **Precedence note (2026-06-10):** the owner's workflow decisions in
+> `docs/FLOW-DECISIONS.md` are the top business authority. Sections of this
+> document that conflict with it are superseded; each implementation phase of
+> `docs/BUILD-CHANGE-PLAN.md` rewrites the affected sections here in the same
+> change.
+
 The previous system's most dangerous defect lived here: a draft Delivery Note
 could be mistaken for a posted stock deduction, and an automated shipment event
 could then skip the real deduction. This document defines a stock model where

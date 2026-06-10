@@ -3,6 +3,12 @@
 Status: Phase 1 planning document. Normative.
 Applies to: the `canadian_outlet` custom Frappe app. ERPNext core is upstream and is never modified.
 
+> **Precedence note (2026-06-10):** the owner's workflow decisions in
+> `docs/FLOW-DECISIONS.md` are the top business authority. Sections of this
+> document that conflict with it are superseded; each implementation phase of
+> `docs/BUILD-CHANGE-PLAN.md` rewrites the affected sections here in the same
+> change.
+
 These invariants are the constitution of this system. Code, tests, fixtures, and
 documentation must conform to them. Any change to an invariant requires an explicit,
 recorded human decision — never an implementation-time judgement call.
@@ -57,18 +63,25 @@ Each invariant is testable. `docs/TEST-PLAN.md` maps tests to invariants by ID.
 
 - The custom field `Sales Order.co_fulfillment_type` permits exactly three values:
   `SELF`, `FBA`, `WFS`.
-- `UNKNOWN` exists only inside the classifier as an intermediate result. An order
-  classified UNKNOWN is **blocked from import** and becomes an Integration
-  Exception (INV-10). A Sales Order with an empty or invalid `co_fulfillment_type`
-  must never be produced by the import pipeline.
+- `UNKNOWN` exists only inside the classifier as an intermediate result and is
+  never written to any document or silently coerced to SELF.
+- **Superseded by FLOW-DECISIONS D3 (lands with BUILD-CHANGE-PLAN C3):** an
+  order classified UNKNOWN imports as a real Sales Order in **quarantine** —
+  visible and counted, but barred from holding stock, deducting, shipping, or
+  invoicing until a human classifies it. Until C3 lands, the current build's
+  behavior (blocked into Integration Exception) remains in force.
 
 ## INV-7 — Only SELF fulfillment can affect local stock
 
 - `SELF` is the only fulfillment type whose orders may ever cause a movement of
   Canadian Outlet's local ERPNext stock.
 - `FBA` and `WFS` orders must **never** create, submit, or trigger any
-  stock-impacting ERPNext document against local warehouses. Marketplace-held
-  inventory is not modeled as local ERPNext stock.
+  stock-impacting ERPNext document against the 1431 Yonge shelf.
+- **Amended by FLOW-DECISIONS D4 (lands with BUILD-CHANGE-PLAN C6):** Amazon
+  FBA inventory becomes a real "At Amazon FBA" location — outbound transfers
+  recorded against Inbound Shipment IDs, FBA orders deducting that location
+  only, periodic human true-up. WFS remains informational. The shelf stays
+  untouchable by any marketplace event.
 
 ## INV-8 — Stock deducts only on a submitted stock-impacting document
 

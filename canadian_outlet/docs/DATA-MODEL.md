@@ -8,6 +8,12 @@ Governing invariants: INV-1, INV-2, INV-4, INV-6, INV-11.
 
 ---
 
+> **Precedence note (2026-06-10):** the owner's workflow decisions in
+> `docs/FLOW-DECISIONS.md` are the top business authority. Sections of this
+> document that conflict with it are superseded; each implementation phase of
+> `docs/BUILD-CHANGE-PLAN.md` rewrites the affected sections here in the same
+> change.
+
 ## 1. Principles
 
 - Reuse ERPNext standard DocTypes: Item, Customer, Sales Order, Sales Order Item,
