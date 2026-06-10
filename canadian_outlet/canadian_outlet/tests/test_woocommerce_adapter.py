@@ -73,7 +73,8 @@ class TestWooCommerceAdapter(FrappeTestCase):
 
 		setup_woocommerce_channel(CHANNEL)
 		utils.make_listing(CHANNEL, "WOO-SKU-1")
-		result = import_order(translate_order(CHANNEL, SYNTHETIC_WOO_PAYLOAD))
+		payload = dict(SYNTHETIC_WOO_PAYLOAD, currency=utils.default_currency())
+		result = import_order(translate_order(CHANNEL, payload))
 
 		self.assertEqual(result.outcome, "Created")
 		sales_orders = utils.get_sales_orders(CHANNEL, "7001")

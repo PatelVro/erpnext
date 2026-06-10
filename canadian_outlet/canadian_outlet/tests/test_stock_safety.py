@@ -34,26 +34,20 @@ class TestStockSafety(FrappeTestCase):
 		utils.enable_imports()
 
 	def _make_delivery_note(self, qty=1):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		make_stock_entry(
 			item_code=utils.TEST_ITEM, target=utils.TEST_WAREHOUSE, qty=qty + 10, basic_rate=1
 		)
-		return frappe.get_doc(
-			{
-				"doctype": "Delivery Note",
-				"customer": utils.TEST_CUSTOMER,
-				"company": utils.TEST_COMPANY,
-				"items": [
-					{
-						"item_code": utils.TEST_ITEM,
-						"qty": qty,
-						"rate": 10,
-						"warehouse": utils.TEST_WAREHOUSE,
-					}
-				],
-			}
-		).insert()
+		return create_delivery_note(
+			item_code=utils.TEST_ITEM,
+			warehouse=utils.TEST_WAREHOUSE,
+			qty=qty,
+			rate=10,
+			currency=utils.default_currency(),
+			do_not_submit=True,
+		)
 
 	def test_t_stk_1_draft_delivery_note_moves_no_stock(self):
 		# T-STK-1 (INV-8): draft DN -> zero stock ledger entries; any
