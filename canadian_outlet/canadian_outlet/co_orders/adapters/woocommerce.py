@@ -77,11 +77,19 @@ def fetch_orders(statuses=DEFAULT_STATUSES, modified_after=None, page=1, per_pag
 def import_woocommerce_orders(channel, statuses=DEFAULT_STATUSES, modified_after=None):
 	"""Operator-triggered import run (manual transport, docs/ORDER-FLOW.md §6).
 	Every payload goes through the shared Order Import Service — there is no
-	Woo-specific Sales Order path (INV-9)."""
+	Woo-specific Sales Order path (INV-9). Pages until the API returns an
+	empty page, so windows larger than one page are not silently truncated;
+	re-importing overlap is safe (INV-11)."""
 	summary = {"created": 0, "duplicate": 0, "exception": 0}
-	for payload in fetch_orders(statuses=statuses, modified_after=modified_after):
-		result = import_order(translate_order(channel, payload))
-		summary[result.outcome.lower()] += 1
+	page = 1
+	while True:
+		batch = fetch_orders(statuses=statuses, modified_after=modified_after, page=page)
+		if not batch:
+			break
+		for payload in batch:
+			result = import_order(translate_order(channel, payload))
+			summary[result.outcome.lower()] += 1
+		page += 1
 	return summary
 
 
@@ -111,6 +119,13 @@ def handle_webhook(channel, raw_body, signature):
 
 	if not verify_webhook_signature(raw_body, signature):
 		frappe.throw(_("Invalid webhook signature"), frappe.PermissionError)
+
+	# Channel isolation: the secret authenticates the WooCommerce store, so a
+	# valid signature must not be redirectable at another channel type. (One
+	# Woo store per site is the documented assumption — CONFIGURATION §4.2;
+	# per-channel secrets become necessary if a second store is added.)
+	if frappe.db.get_value("Channel", channel, "channel_type") != "WooCommerce":
+		frappe.throw(_("{0} is not a WooCommerce channel").format(channel), frappe.PermissionError)
 
 	payload = json.loads(raw_body)
 	result = import_order(translate_order(channel, payload))

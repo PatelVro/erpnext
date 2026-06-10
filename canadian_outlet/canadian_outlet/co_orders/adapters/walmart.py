@@ -90,13 +90,18 @@ def _base_url():
 	return get_optional_conf("co_walmart_base_url", DEFAULT_BASE_URL).rstrip("/")
 
 
-def fetch_orders(created_start_date, token=None):
+def fetch_orders(created_start_date, token=None, next_cursor=None):
+	"""One page of Walmart orders. Returns (orders, next_cursor) — callers
+	must follow the cursor or windows beyond one page are truncated."""
 	import requests
 
 	token = token or get_access_token()
+	params = {"createdStartDate": created_start_date}
+	if next_cursor:
+		params = {"nextCursor": next_cursor}
 	response = requests.get(
 		f"{_base_url()}/v3/orders",
-		params={"createdStartDate": created_start_date},
+		params=params,
 		headers={
 			"WM_SEC.ACCESS_TOKEN": token,
 			"WM_SVC.NAME": "Canadian Outlet ERP",
@@ -106,20 +111,26 @@ def fetch_orders(created_start_date, token=None):
 		timeout=30,
 	)
 	response.raise_for_status()
-	elements = (response.json().get("list") or {}).get("elements") or {}
-	return elements.get("order") or []
+	body = response.json().get("list") or {}
+	elements = body.get("elements") or {}
+	meta = body.get("meta") or {}
+	return elements.get("order") or [], meta.get("nextCursor")
 
 
 @frappe.whitelist()
 def import_walmart_orders(channel, created_start_date):
-	"""Operator-triggered import run (no scheduler). Every order goes through
-	the shared Order Import Service — no Walmart-specific path (INV-9)."""
+	"""Operator-triggered import run (no Walmart-specific Sales Order path —
+	INV-9). Follows nextCursor across all pages; overlap is safe (INV-11)."""
 	summary = {"created": 0, "duplicate": 0, "exception": 0}
 	token = get_access_token()
-	for payload in fetch_orders(created_start_date, token=token):
-		result = import_order(translate_order(channel, payload))
-		summary[result.outcome.lower()] += 1
-	return summary
+	next_cursor = None
+	while True:
+		orders, next_cursor = fetch_orders(created_start_date, token=token, next_cursor=next_cursor)
+		for payload in orders:
+			result = import_order(translate_order(channel, payload))
+			summary[result.outcome.lower()] += 1
+		if not next_cursor:
+			return summary
 
 
 @frappe.whitelist()

@@ -79,47 +79,66 @@ def _endpoint():
 	return endpoint
 
 
-def fetch_orders(created_after, token=None):
+def fetch_orders(created_after, token=None, next_token=None):
+	"""One page of SP-API orders. Returns (orders, next_token) — callers must
+	follow NextToken or windows beyond one page are silently truncated."""
 	import requests
 
 	token = token or get_access_token()
+	params = {
+		"MarketplaceIds": get_required_conf("co_amazon_marketplace_ids"),
+		"CreatedAfter": created_after,
+	}
+	if next_token:
+		params["NextToken"] = next_token
 	response = requests.get(
 		f"{_endpoint()}/orders/v0/orders",
-		params={
-			"MarketplaceIds": get_required_conf("co_amazon_marketplace_ids"),
-			"CreatedAfter": created_after,
-		},
+		params=params,
 		headers={"x-amz-access-token": token},
 		timeout=30,
 	)
 	response.raise_for_status()
-	return response.json().get("payload", {}).get("Orders", [])
+	payload = response.json().get("payload", {})
+	return payload.get("Orders", []), payload.get("NextToken")
 
 
 def fetch_order_items(amazon_order_id, token=None):
+	"""All items of one order — follows OrderItems NextToken internally."""
 	import requests
 
 	token = token or get_access_token()
-	response = requests.get(
-		f"{_endpoint()}/orders/v0/orders/{amazon_order_id}/orderItems",
-		headers={"x-amz-access-token": token},
-		timeout=30,
-	)
-	response.raise_for_status()
-	return response.json().get("payload", {}).get("OrderItems", [])
+	items, next_token = [], None
+	while True:
+		params = {"NextToken": next_token} if next_token else {}
+		response = requests.get(
+			f"{_endpoint()}/orders/v0/orders/{amazon_order_id}/orderItems",
+			params=params,
+			headers={"x-amz-access-token": token},
+			timeout=30,
+		)
+		response.raise_for_status()
+		payload = response.json().get("payload", {})
+		items.extend(payload.get("OrderItems", []))
+		next_token = payload.get("NextToken")
+		if not next_token:
+			return items
 
 
 @frappe.whitelist()
 def import_amazon_orders(channel, created_after):
-	"""Operator-triggered import run (no scheduler). Every order goes through
-	the shared Order Import Service — no Amazon-specific path (INV-9)."""
+	"""Operator-triggered import run (no Amazon-specific Sales Order path —
+	INV-9). Follows NextToken across all pages; overlap is safe (INV-11)."""
 	summary = {"created": 0, "duplicate": 0, "exception": 0}
 	token = get_access_token()
-	for payload in fetch_orders(created_after, token=token):
-		items = fetch_order_items(payload.get("AmazonOrderId"), token=token)
-		result = import_order(translate_order(channel, payload, items))
-		summary[result.outcome.lower()] += 1
-	return summary
+	next_token = None
+	while True:
+		orders, next_token = fetch_orders(created_after, token=token, next_token=next_token)
+		for payload in orders:
+			items = fetch_order_items(payload.get("AmazonOrderId"), token=token)
+			result = import_order(translate_order(channel, payload, items))
+			summary[result.outcome.lower()] += 1
+		if not next_token:
+			return summary
 
 
 @frappe.whitelist()

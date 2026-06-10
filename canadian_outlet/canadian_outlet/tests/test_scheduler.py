@@ -49,7 +49,7 @@ class TestScheduler(FrappeTestCase):
 		payload = dict(WOO_PAYLOAD, currency=utils.default_currency())
 		with patch(
 			"canadian_outlet.co_orders.adapters.woocommerce.fetch_orders",
-			return_value=[payload],
+			side_effect=[[payload], []],
 		):
 			result = daily_channel_sync()
 
@@ -66,7 +66,7 @@ class TestScheduler(FrappeTestCase):
 		payload = dict(WOO_PAYLOAD, id=9102, currency=utils.default_currency())
 		with patch(
 			"canadian_outlet.co_orders.adapters.woocommerce.fetch_orders",
-			return_value=[payload],
+			side_effect=[[payload], []],
 		), patch(
 			"canadian_outlet.co_orders.adapters.amazon.get_access_token",
 			side_effect=Exception("synthetic LWA outage"),
