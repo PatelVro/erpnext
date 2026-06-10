@@ -114,3 +114,6 @@ class TestStockSafety(FrappeTestCase):
 		self.assertEqual(_stock_documents_for_order(sales_orders[0].name), [])
 		self.assertEqual(frappe.db.count("Stock Entry"), stock_entry_count_before)
 		self.assertEqual(frappe.db.count("Delivery Note"), delivery_note_count_before)
+
+# Frappe test runner: create ERPNext standard test records first.
+test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

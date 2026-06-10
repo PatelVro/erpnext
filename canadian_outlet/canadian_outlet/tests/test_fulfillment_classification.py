@@ -92,3 +92,6 @@ class TestFulfillmentClassification(FrappeTestCase):
 		sales_orders = utils.get_sales_orders(WOO, "ORD-FUL4")
 		self.assertEqual(len(sales_orders), 1)
 		self.assertIn(sales_orders[0].co_fulfillment_type, ("SELF", "FBA", "WFS"))
+
+# Frappe test runner: create ERPNext standard test records first.
+test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

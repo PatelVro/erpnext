@@ -111,3 +111,6 @@ class TestWooCommerceAdapter(FrappeTestCase):
 
 		self.assertEqual(result.outcome, "Exception")
 		self.assertEqual(utils.get_sales_orders(CHANNEL, "7003"), [])
+
+# Frappe test runner: create ERPNext standard test records first.
+test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

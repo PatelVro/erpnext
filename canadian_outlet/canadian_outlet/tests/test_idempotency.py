@@ -109,3 +109,6 @@ class TestIdempotency(FrappeTestCase):
 		exc.insert()
 		self.assertEqual(exc.status, "Ignored")
 		self.assertTrue(exc.resolved_or_ignored_on)
+
+# Frappe test runner: create ERPNext standard test records first.
+test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

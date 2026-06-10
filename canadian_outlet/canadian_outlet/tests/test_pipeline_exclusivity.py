@@ -52,3 +52,6 @@ class TestPipelineExclusivity(FrappeTestCase):
 		with self.assertRaises(ImportsDisabledError):
 			import_order(order)
 		self.assertEqual(utils.get_sales_orders(CHANNEL, "ORD-PIPE2"), [])
+
+# Frappe test runner: create ERPNext standard test records first.
+test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

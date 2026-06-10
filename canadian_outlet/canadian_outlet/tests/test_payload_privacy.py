@@ -87,3 +87,6 @@ class TestPayloadPrivacy(FrappeTestCase):
 			)
 			for label, value in PLANTED_PII.items():
 				self.assertNotIn(value, log_text, f"PII leaked into log: {label}")
+
+# Frappe test runner: create ERPNext standard test records first.
+test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

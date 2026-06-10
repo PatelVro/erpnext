@@ -77,3 +77,6 @@ class TestItemResolution(FrappeTestCase):
 		self.assertTrue(frappe.db.exists("Item", utils.TEST_ITEM))
 		with self.assertRaises(UnresolvedListingError):
 			resolve_external_identity(CHANNEL, utils.TEST_ITEM)
+
+# Frappe test runner: create ERPNext standard test records first.
+test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

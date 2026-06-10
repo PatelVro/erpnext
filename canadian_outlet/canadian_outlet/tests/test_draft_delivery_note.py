@@ -78,3 +78,6 @@ class TestDraftDeliveryNote(FrappeTestCase):
 			)
 		)
 		self.assertRaises(frappe.ValidationError, create_draft_delivery_note, result.sales_order)
+
+# Frappe test runner: create ERPNext standard test records first.
+test_dependencies = ["Company", "Item", "Customer", "Warehouse"]

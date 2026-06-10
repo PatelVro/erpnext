@@ -52,3 +52,6 @@ class TestAtomicity(FrappeTestCase):
 		self.assertEqual(frappe.db.count("Sales Order"), so_count_before)
 		self.assertEqual(frappe.db.count("Customer"), customer_count_before)
 		self.assertEqual(frappe.db.count("Item"), item_count_before)
+
+# Frappe test runner: create ERPNext standard test records first.
+test_dependencies = ["Company", "Item", "Customer", "Warehouse"]
