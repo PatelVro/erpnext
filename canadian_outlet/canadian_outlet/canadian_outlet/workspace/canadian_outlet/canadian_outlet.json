@@ -1,0 +1,190 @@
+{
+ "charts": [],
+ "content": "[{\"id\": \"co_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Canadian Outlet</b></span>\", \"col\": 12}}, {\"id\": \"co_sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Integration Exceptions\", \"col\": 3}}, {\"id\": \"co_sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Channel Listings\", \"col\": 3}}, {\"id\": \"co_sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Orders\", \"col\": 3}}, {\"id\": \"co_sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Exception Aging\", \"col\": 3}}, {\"id\": \"co_sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"co_c1\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}, {\"id\": \"co_c2\", \"type\": \"card\", \"data\": {\"card_name\": \"Catalog & Channels\", \"col\": 4}}, {\"id\": \"co_c3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "creation": "2026-06-10 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "retail",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Canadian Outlet",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Operations",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Integration Exception",
+   "link_count": 0,
+   "link_to": "Integration Exception",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Order Import Log",
+   "link_count": 0,
+   "link_to": "Order Import Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Shipment Status Event",
+   "link_count": 0,
+   "link_to": "Shipment Status Event",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Canadian Outlet Settings",
+   "link_count": 0,
+   "link_to": "Canadian Outlet Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Catalog & Channels",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Channel",
+   "link_count": 0,
+   "link_to": "Channel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Channel Listing",
+   "link_count": 0,
+   "link_to": "Channel Listing",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Channel Fulfillment Map",
+   "link_count": 0,
+   "link_to": "Channel Fulfillment Map",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Channel Sales Summary",
+   "link_count": 0,
+   "link_to": "Channel Sales Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Integration Exception Aging",
+   "link_count": 0,
+   "link_to": "Integration Exception Aging",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Channel Listing Health",
+   "link_count": 0,
+   "link_to": "Channel Listing Health",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Reorder Status",
+   "link_count": 0,
+   "link_to": "Reorder Status",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-06-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Canadian Outlet",
+ "name": "Canadian Outlet",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 99.0,
+ "shortcuts": [
+  {
+   "color": "Red",
+   "label": "Integration Exceptions",
+   "link_to": "Integration Exception",
+   "type": "DocType"
+  },
+  {
+   "label": "Channel Listings",
+   "link_to": "Channel Listing",
+   "type": "DocType"
+  },
+  {
+   "label": "Sales Orders",
+   "link_to": "Sales Order",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Exception Aging",
+   "link_to": "Integration Exception Aging",
+   "report_ref_doctype": "Integration Exception",
+   "type": "Report"
+  }
+ ],
+ "title": "Canadian Outlet"
+}
