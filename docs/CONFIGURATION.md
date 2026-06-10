@@ -67,11 +67,14 @@ a key listed here must be read with exactly this name.
 |---|---|---|
 | `co_environment` | yes | `dev`, `staging`, or `production`. Guards anything that must not run outside production and enables dev-only affordances. |
 
-### 4.2 WooCommerce (reserved — keys land in Phase 6)
+### 4.2 WooCommerce (Phase 13 — final)
 
-Namespace `co_woocommerce_*`. Expected shape (illustrative, finalized in Phase 6):
-`co_woocommerce_base_url`, `co_woocommerce_consumer_key`,
-`co_woocommerce_consumer_secret`, `co_woocommerce_webhook_secret`.
+| Key | Required | Purpose |
+|---|---|---|
+| `co_woocommerce_base_url` | yes | Store base URL (no trailing slash needed) |
+| `co_woocommerce_consumer_key` | yes | Woo REST API consumer key |
+| `co_woocommerce_consumer_secret` | yes | Woo REST API consumer secret |
+| `co_woocommerce_api_path` | no | API path prefix; defaults to `/wp-json/wc/v3` |
 
 ### 4.3 ShipStation (reserved — keys land in Phase 7)
 
