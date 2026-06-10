@@ -78,8 +78,12 @@ Sales Order (draft, SELF) → human reviews → human submits SO
 ## 5. Shipment status (ShipStation)
 
 `canadian_outlet.co_shipping.shipstation.import_shipstation_shipments(channel, ship_date_start=...)`
-records Shipment Status Events. A "shipped" event is informational only — it
-never submits anything and never moves stock (docs/STOCK-FLOW.md §4).
+records Shipment Status Events. By default a "shipped" event is informational
+only. With the STOCK-FLOW §5 kill switch ON
+(`auto_submit_delivery_note_on_shipped`), a shipped event SUBMITS the existing
+draft Delivery Note of the matching SELF order — it never creates documents,
+never touches FBA/WFS, and a failed submit leaves the draft in the human
+queue.
 
 ## 5A. Reports, workspace, settlement
 
@@ -114,5 +118,5 @@ Both make import runs raise immediately and create nothing.
 - [ ] 1431 Yonge confirmed and set as default warehouse
 - [ ] Channels created, rules installed, listings mapped for live SKUs
 - [ ] Draft-DN review queue owner named
-- [ ] Retention purge calendar reminder created
+- [ ] Scheduler enabled on the site (runs the daily sync and weekly purge)
 - [ ] `imports_enabled` turned on last
