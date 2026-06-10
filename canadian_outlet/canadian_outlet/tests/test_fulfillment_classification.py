@@ -57,6 +57,15 @@ class TestFulfillmentClassification(FrappeTestCase):
 		self.assertEqual(len(exceptions), 1)
 		self.assertEqual(utils.get_sales_orders(AMZ, "ORD-FUL2"), [])
 
+	def test_t_ful_2b_contradictory_evidence_is_unknown(self):
+		# INV-5: contradictory matches fail closed, exactly like no match.
+		# Two evidence keys each match a rule, but the rules disagree.
+		from canadian_outlet.co_orders.classification import classify_fulfillment
+
+		utils.make_rule(AMZ, "secondary_flag", "ALSO-WFS", "WFS")
+		evidence = {"fulfillment_channel": "AFN", "secondary_flag": "ALSO-WFS"}
+		self.assertEqual(classify_fulfillment(AMZ, evidence), "UNKNOWN")
+
 	def test_t_ful_3_unknown_never_becomes_self(self):
 		# T-FUL-3 (INV-5, INV-6)
 		from canadian_outlet.co_orders.import_service import import_order

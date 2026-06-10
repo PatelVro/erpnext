@@ -53,5 +53,25 @@ class TestAtomicity(FrappeTestCase):
 		self.assertEqual(frappe.db.count("Customer"), customer_count_before)
 		self.assertEqual(frappe.db.count("Item"), item_count_before)
 
+	def test_currency_without_exchange_rate_fails_closed(self):
+		# Regression for the failure observed live on the bench: an order in a
+		# currency with no exchange rate must become a Creation-stage
+		# Integration Exception (INV-10), never a partial Sales Order.
+		from canadian_outlet.co_orders.import_service import import_order
+
+		utils.make_listing(CHANNEL, "EXT-SKU-CURR")
+		order = utils.make_order(
+			CHANNEL,
+			"ORD-CURR1",
+			lines=[{"external_identity": "EXT-SKU-CURR", "qty": 1, "rate": 5}],
+		)
+		order["currency"] = "BHD"  # valid ISO currency, no exchange rate configured
+
+		result = import_order(order)
+		self.assertEqual(result.outcome, "Exception")
+		self.assertEqual(utils.get_sales_orders(CHANNEL, "ORD-CURR1"), [])
+		exceptions = utils.get_exceptions(CHANNEL, "ORD-CURR1", failure_stage="Creation")
+		self.assertEqual(len(exceptions), 1)
+
 # Frappe test runner: create ERPNext standard test records first.
 test_dependencies = ["Company", "Item", "Customer", "Warehouse"]
