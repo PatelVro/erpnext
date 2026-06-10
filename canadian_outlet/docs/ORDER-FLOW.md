@@ -98,12 +98,15 @@ retention policy (Phase 1.5) must cover the Customer master too.
 
 - **Channels:** WooCommerce only (Phase 6). Amazon and Walmart classification
   rules are already fixed by INV-5 but their adapters arrive in Phase 8.
-- **Transport:** manual/operator-triggered import runs and manual replay only.
+- **Transport:** manual/operator-triggered import runs and manual replay.
   A scheduled polling job is **not** implied by this — scheduled jobs of any
   kind require their own explicit approval (see ERP-INVARIANTS out-of-scope
-  list), as a separately approved addition within Phase 6. Webhooks may be added
-  within Phase 6 only if signature verification and idempotency are demonstrated
-  by tests first.
+  list). The WooCommerce **webhook receiver exists** under this section's
+  condition — signature verification and idempotency are demonstrated by
+  tests (`tests/test_woocommerce_webhook.py`): HMAC-SHA256 with constant-time
+  comparison, invalid/tampered deliveries create nothing, duplicates are
+  idempotent via the shared pipeline, and the kill switch raises so the
+  source retries later.
 - **Draft Delivery Note on import:** NOT created in V1 by default. Auto-creating a
   draft Delivery Note for SELF orders is a candidate convenience for a later
   explicitly scoped change (OPEN — Phase 0 question 6). Until then, operators

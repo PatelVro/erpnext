@@ -85,6 +85,53 @@ def import_woocommerce_orders(channel, statuses=DEFAULT_STATUSES, modified_after
 	return summary
 
 
+def verify_webhook_signature(raw_body, signature):
+	"""WooCommerce signs webhooks with base64(HMAC-SHA256(secret, body)).
+	Constant-time comparison; missing secret fails loudly (T-CFG-1)."""
+	import base64
+	import hashlib
+	import hmac
+
+	secret = get_required_conf("co_woocommerce_webhook_secret")
+	if not signature:
+		return False
+	expected = base64.b64encode(
+		hmac.new(secret.encode(), raw_body, hashlib.sha256).digest()
+	).decode()
+	return hmac.compare_digest(expected, signature)
+
+
+def handle_webhook(channel, raw_body, signature):
+	"""Verify, translate, and import one webhook delivery. Permitted by
+	ORDER-FLOW §6 because signature verification and idempotency are
+	demonstrated by tests (test_woocommerce_webhook). Invalid signatures
+	create nothing; duplicates are idempotent via the shared pipeline
+	(INV-11A); the kill switch raises so WooCommerce retries later."""
+	import json
+
+	if not verify_webhook_signature(raw_body, signature):
+		frappe.throw(_("Invalid webhook signature"), frappe.PermissionError)
+
+	payload = json.loads(raw_body)
+	result = import_order(translate_order(channel, payload))
+	return {
+		"outcome": result.outcome,
+		"sales_order": result.sales_order,
+		"integration_exception": result.integration_exception,
+	}
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+def woocommerce_webhook(channel):
+	"""HTTP endpoint for WooCommerce webhook deliveries. Guest access is safe
+	because handle_webhook rejects anything without a valid HMAC signature."""
+	return handle_webhook(
+		channel,
+		frappe.request.get_data(),
+		frappe.request.headers.get("X-WC-Webhook-Signature"),
+	)
+
+
 @frappe.whitelist()
 def setup_woocommerce_channel(channel):
 	"""Explicit, human-invoked setup: ensures the data-driven SELF rule for a

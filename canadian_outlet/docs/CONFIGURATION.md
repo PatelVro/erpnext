@@ -75,6 +75,7 @@ a key listed here must be read with exactly this name.
 | `co_woocommerce_consumer_key` | yes | Woo REST API consumer key |
 | `co_woocommerce_consumer_secret` | yes | Woo REST API consumer secret |
 | `co_woocommerce_api_path` | no | API path prefix; defaults to `/wp-json/wc/v3` |
+| `co_woocommerce_webhook_secret` | yes, when the webhook transport is used | HMAC secret for webhook signature verification |
 
 ### 4.3 ShipStation (Phase 14 — final)
 
