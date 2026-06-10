@@ -250,9 +250,35 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 				"Canadian Outlet Settings: marketplace_fulfillment_supplier is not set "
 				"— required for FBA/WFS orders (INV-7)",
 			)
+	from frappe.utils import flt
+
+	tax_total = flt(order.get("tax_total"))
+	taxes = []
+	if tax_total > 0:
+		# C5 (FLOW-DECISIONS D9): taxes recorded per order, as the channel
+		# charged them. The receiving account is operator-configured; an
+		# order carrying tax with no account configured fails closed rather
+		# than silently dropping tax from the books.
+		tax_account = frappe.db.get_single_value(
+			"Canadian Outlet Settings", "marketplace_tax_account"
+		)
+		if not tax_account:
+			raise _ImportBlocked(
+				"Creation",
+				"Canadian Outlet Settings: marketplace_tax_account is not set "
+				"— required because this order carries tax (D9)",
+			)
+		taxes = [{
+			"charge_type": "Actual",
+			"account_head": tax_account,
+			"description": "Marketplace collected tax",
+			"tax_amount": tax_total,
+		}]
+
 	doc = frappe.get_doc(
 		{
 			"doctype": "Sales Order",
+			"taxes": taxes,
 			"customer": customer,
 			"transaction_date": nowdate(),
 			"delivery_date": delivery_date,
@@ -288,6 +314,13 @@ def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfil
 		# the warehouse and raise Bin.reserved_qty; FBA/WFS lines carry none
 		# and hold nothing (INV-7). Cancelling the order releases the hold.
 		doc.submit()
+		if fulfillment_type == "FBA" and not order.get("cancelled"):
+			# C6 (FLOW-DECISIONS D4/B1): an FBA sale deducts the At-FBA
+			# location — never the shelf. No-op when FBA is unmodeled;
+			# failures log and never block the import.
+			from canadian_outlet.co_inventory.fba import issue_fba_sale
+
+			issue_fba_sale(doc)
 		if order.get("cancelled"):
 			# Cancelled before we ever saw it: the per-order record must
 			# still exist (D1), but it holds nothing.

@@ -35,6 +35,9 @@ def translate_order(channel, payload, order_items):
 		"cancelled": payload.get("OrderStatus") == "Canceled",
 		"currency": (payload.get("OrderTotal") or {}).get("CurrencyCode"),
 		"totals": (payload.get("OrderTotal") or {}).get("Amount"),
+		"tax_total": sum(
+			flt((item.get("ItemTax") or {}).get("Amount")) for item in (order_items or [])
+		),
 		"evidence": {EVIDENCE_KEY: payload.get("FulfillmentChannel") or ""},
 		"lines": [
 			{

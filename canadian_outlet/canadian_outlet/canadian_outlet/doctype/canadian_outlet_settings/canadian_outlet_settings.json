@@ -7,7 +7,10 @@
   "imports_enabled",
   "default_warehouse",
   "marketplace_fulfillment_supplier",
-  "deduct_on_shipped_event"
+  "deduct_on_shipped_event",
+  "auto_invoice_on_shipment",
+  "marketplace_tax_account",
+  "fba_warehouse"
  ],
  "fields": [
   {
@@ -37,11 +40,32 @@
    "fieldname": "deduct_on_shipped_event",
    "fieldtype": "Check",
    "label": "Deduct on Shipped Event"
+  },
+  {
+   "default": "0",
+   "description": "Switch \u2463 (C5, FLOW-DECISIONS D9/D10): when ON, each per-shipment deduction also creates and submits the Sales Invoice in the same heartbeat. OFF by default \u2014 invoicing stays a human click until trusted.",
+   "fieldname": "auto_invoice_on_shipment",
+   "fieldtype": "Check",
+   "label": "Auto-Invoice on Shipment"
+  },
+  {
+   "description": "Account that receives marketplace-collected tax on imported orders (C5, D9: taxes recorded per order). Required when an order carries tax \u2014 imports with tax fail closed without it.",
+   "fieldname": "marketplace_tax_account",
+   "fieldtype": "Link",
+   "label": "Marketplace Tax Account",
+   "options": "Account"
+  },
+  {
+   "description": "The real 'At Amazon FBA' location (C6, FLOW-DECISIONS D4): inbound transfers land here and FBA sales deduct it. Leave empty to keep FBA unmodeled.",
+   "fieldname": "fba_warehouse",
+   "fieldtype": "Link",
+   "label": "FBA Warehouse",
+   "options": "Warehouse"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-10 14:00:00.000000",
+ "modified": "2026-06-10 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Canadian Outlet",
  "name": "Canadian Outlet Settings",

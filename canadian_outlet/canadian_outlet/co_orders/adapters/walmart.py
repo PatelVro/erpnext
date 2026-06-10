@@ -29,6 +29,7 @@ def translate_order(channel, payload):
 		"channel_status": _first_line_status(order_lines),
 		"cancelled": _first_line_status(order_lines) == "Cancelled",
 		"currency": _currency(order_lines),
+		"tax_total": _tax_total(order_lines),
 		"evidence": {EVIDENCE_KEY: (payload.get("shipNode") or {}).get("type") or ""},
 		"lines": [
 			{
@@ -68,6 +69,15 @@ def _currency(order_lines):
 
 def _unit_price(line):
 	return flt(_charge(line).get("amount"))
+
+
+def _tax_total(order_lines):
+	total = 0.0
+	for line in order_lines:
+		for charge in ((line.get("charges") or {}).get("charge")) or []:
+			tax = charge.get("tax") or {}
+			total += flt((tax.get("taxAmount") or {}).get("amount"))
+	return total
 
 
 def get_access_token():

@@ -138,6 +138,7 @@ def process_shipment_event(event_name):
 	requested = dict(item_qtys)
 	dn_name = create_delivery_for_shipment(event.sales_order, item_qtys)
 	if dn_name:
+		_maybe_auto_invoice(dn_name)
 		if any(qty > 0 for qty in item_qtys.values()):
 			frappe.log_error(
 				title=f"Over-shipment capped: {event.name}",
@@ -146,6 +147,26 @@ def process_shipment_event(event_name):
 			)
 		event.db_set("delivery_note", dn_name)
 	return dn_name
+
+
+def _maybe_auto_invoice(delivery_note):
+	"""C5 (switch ④, OFF by default — D10 manual-first): the invoice rides the
+	deduction heartbeat. A failed invoice is logged and never undoes the
+	deduction — the human queue is the backstop."""
+	if not frappe.db.get_single_value("Canadian Outlet Settings", "auto_invoice_on_shipment"):
+		return
+	try:
+		from canadian_outlet.co_billing.invoice_service import create_invoice_for_delivery
+
+		invoice_name = create_invoice_for_delivery(delivery_note)
+		invoice = frappe.get_doc("Sales Invoice", invoice_name)
+		if invoice.docstatus == 0:
+			invoice.submit()
+	except Exception:
+		frappe.log_error(
+			title=f"Auto-invoice failed: {delivery_note}",
+			message=frappe.get_traceback(),
+		)
 
 
 def fetch_shipments(page=1, page_size=100, ship_date_start=None):

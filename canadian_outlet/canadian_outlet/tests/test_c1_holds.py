@@ -46,8 +46,7 @@ class TestC1Holds(FrappeTestCase):
 
 	def test_self_import_holds_without_moving_physical_count(self):
 		# INV-12: submitted on arrival; availability down, shelf untouched.
-		default_company = frappe.defaults.get_global_default("company")
-		warehouse = frappe.db.get_value("Warehouse", {"company": default_company, "is_group": 0})
+		warehouse = utils.shelf_warehouse()
 		actual_before = _actual(utils.TEST_ITEM, warehouse)
 
 		result = self._import("ORD-C1A", qty=3)
@@ -67,8 +66,7 @@ class TestC1Holds(FrappeTestCase):
 		)
 
 	def test_fba_import_holds_nothing(self):
-		default_company = frappe.defaults.get_global_default("company")
-		warehouse = frappe.db.get_value("Warehouse", {"company": default_company, "is_group": 0})
+		warehouse = utils.shelf_warehouse()
 		reserved_before = _reserved(utils.TEST_ITEM, warehouse)
 
 		result = self._import("ORD-C1B", evidence=dict(utils.AMAZON_AFN_EVIDENCE))

@@ -127,18 +127,50 @@ def ensure_fulfillment_supplier():
 	return name
 
 
+def ensure_tax_account():
+	default_company = frappe.defaults.get_global_default("company")
+	existing = frappe.db.get_value(
+		"Account", {"company": default_company, "account_type": "Tax", "is_group": 0}
+	)
+	if existing:
+		return existing
+	parent = frappe.db.get_value(
+		"Account", {"company": default_company, "root_type": "Liability", "is_group": 1}
+	)
+	return frappe.get_doc({
+		"doctype": "Account", "account_name": "CO Marketplace Tax", "company": default_company,
+		"parent_account": parent, "account_type": "Tax",
+	}).insert(ignore_permissions=True).name
+
+
+def shelf_warehouse():
+	"""Deterministic 'shelf' for tests: the company's first non-group,
+	non-transit warehouse that is not the At-FBA location. get_value without
+	this discipline picks arbitrarily — including the transit warehouse —
+	which made test results depend on run order."""
+	default_company = frappe.defaults.get_global_default("company")
+	for row in frappe.get_all(
+		"Warehouse",
+		filters={"company": default_company, "is_group": 0},
+		fields=["name", "warehouse_type"],
+		order_by="name",
+	):
+		if row.warehouse_type == "Transit" or row.name.startswith("At Amazon FBA"):
+			continue
+		return row.name
+	frappe.throw("No usable shelf warehouse for tests")
+
+
 def enable_imports(default_warehouse=None):
 	if default_warehouse is None:
-		# SELF Sales Orders inherit this warehouse, and ERPNext requires it to
-		# belong to the order's company — which is the site default company.
-		default_company = frappe.defaults.get_global_default("company")
-		default_warehouse = frappe.db.get_value(
-			"Warehouse", {"company": default_company, "is_group": 0}
-		)
+		default_warehouse = shelf_warehouse()
 	frappe.db.set_single_value("Canadian Outlet Settings", "imports_enabled", 1)
 	frappe.db.set_single_value("Canadian Outlet Settings", "default_warehouse", default_warehouse)
 	frappe.db.set_single_value(
 		"Canadian Outlet Settings", "marketplace_fulfillment_supplier", ensure_fulfillment_supplier()
+	)
+	frappe.db.set_single_value(
+		"Canadian Outlet Settings", "marketplace_tax_account", ensure_tax_account()
 	)
 
 
