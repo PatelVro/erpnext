@@ -26,9 +26,15 @@ fixtures = [
 	}
 ]
 
+# Phase 24: the ONLY approved scheduled jobs (T-PIPE-1 pins this exact set).
+# Both no-op unless their kill switches are deliberately enabled.
+scheduler_events = {
+	"daily": ["canadian_outlet.co_core.scheduler.daily_channel_sync"],
+	"weekly": ["canadian_outlet.co_core.scheduler.weekly_retention_purge"],
+}
+
 # Per AGENTS.md, every hook added here must arrive in an explicitly approved
 # phase and cite the invariant it implements (docs/ERP-INVARIANTS.md).
 # The following stay empty until their phase is approved:
 #   - doc_events            (no Sales Order / Delivery Note automation)
-#   - scheduler_events      (no scheduled jobs)
 #   - override_doctype_class (never — ERPNext core behavior stays untouched)

@@ -17,13 +17,20 @@ class TestPipelineExclusivity(FrappeTestCase):
 		utils.enable_imports()
 
 	def test_t_pipe_1_no_side_channel_automation_registered(self):
-		# T-PIPE-1 (INV-9): the app registers no document automation and no
-		# scheduler; the only order-creation entry point is import_order.
+		# T-PIPE-1 (INV-9): no document automation, no core overrides, and the
+		# scheduler set is EXACTLY the Phase 24-approved jobs — any other
+		# scheduled automation fails this test by design.
 		from canadian_outlet import hooks
 
 		self.assertFalse(getattr(hooks, "doc_events", None))
-		self.assertFalse(getattr(hooks, "scheduler_events", None))
 		self.assertFalse(getattr(hooks, "override_doctype_class", None))
+		self.assertEqual(
+			getattr(hooks, "scheduler_events", None),
+			{
+				"daily": ["canadian_outlet.co_core.scheduler.daily_channel_sync"],
+				"weekly": ["canadian_outlet.co_core.scheduler.weekly_retention_purge"],
+			},
+		)
 
 		from canadian_outlet.co_orders.import_service import import_order
 

@@ -118,11 +118,15 @@ manual replay) must not duplicate any record or effect.
 These are not invariants; they are reminders that the following do **not** exist in
 V1 and must not be built opportunistically:
 
-- Automatic stock posting from ShipStation or any shipment event
-- Scheduled jobs of any kind
-- Amazon / Walmart importers (WooCommerce is first; see phase plan)
-- Payment reconciliation
-- Frontend pages / dashboards
+- Payment/settlement reconciliation (needs real settlement data)
+- Custom frontend pages (standard reports/workspaces are configuration,
+  not pages)
+
+Approved by explicit later phases (each kill-switched and pinned by tests):
+shipped-event Delivery Note submission (Phase 18, STOCK-FLOW §5), Amazon and
+Walmart importers (Phases 15-16), and exactly two scheduled jobs — daily
+channel sync and weekly retention purge (Phase 24; T-PIPE-1 pins the set and
+both no-op until kill switches are deliberately enabled).
 
 ## Open items (must be resolved before the affected phase)
 

@@ -65,11 +65,11 @@ loosening either is a one-line change here plus a fixture/test update.
 
 ## 6. Purge mechanics — constraint
 
-Automated purging would require a **scheduled job, which is not approved**
-(AGENTS.md scope gates). Retention is enforced by the operator-invoked
-`canadian_outlet.co_core.retention.purge_expired_payload_copies()` run on a
-calendar reminder (docs/OPERATIONS.md §6). The data model records the
-terminal-status timestamp (`resolved_or_ignored_on`) the purge computes from.
+Retention is enforced by
+`canadian_outlet.co_core.retention.purge_expired_payload_copies()`, which runs
+as the Phase 24-approved **weekly scheduled job** and remains operator-invokable
+(docs/OPERATIONS.md §6). The data model records the terminal-status timestamp
+(`resolved_or_ignored_on`) the purge computes from.
 
 ## 7. Enforcement
 

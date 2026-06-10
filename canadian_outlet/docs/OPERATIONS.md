@@ -25,7 +25,11 @@ runbook and the invariants disagree, the invariants win.
    Item. Unmapped listings do not import — they become Integration Exceptions
    (INV-4). That is the system working, not failing.
 
-## 2. Importing orders (operator-triggered; there is no scheduler)
+## 2. Importing orders
+
+A daily scheduled sync (Phase 24) imports the last 2 days from every ENABLED
+channel — it no-ops entirely while `imports_enabled` is off. Manual runs for
+backfill or testing:
 
 ```text
 woocommerce.import_woocommerce_orders(channel, statuses=..., modified_after=...)
@@ -77,12 +81,12 @@ Sales Order (draft, SELF) → human reviews → human submits SO
 records Shipment Status Events. A "shipped" event is informational only — it
 never submits anything and never moves stock (docs/STOCK-FLOW.md §4).
 
-## 6. Retention purge (manual, monthly)
+## 6. Retention purge
 
 `canadian_outlet.co_core.retention.purge_expired_payload_copies()` clears
 stored payload copies on terminal exceptions older than 90 days
-(docs/PRIVACY-REDACTION.md §5). Run it on a calendar reminder — there is
-deliberately no scheduled job.
+(docs/PRIVACY-REDACTION.md §5). It runs weekly as a Phase 24 scheduled job
+and can also be invoked manually.
 
 ## 7. Kill switches (fail closed)
 
