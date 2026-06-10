@@ -66,9 +66,13 @@ Order Import Service. Defined precisely in Phase 5; its required content is:
 - Repeated failure of the same order for the same cause updates the existing open
   exception (INV-11C); it never creates duplicates.
 - **Resolution loop:** a human fixes the underlying cause (e.g. creates the
-  missing Channel Listing), then triggers replay. Replay re-enters the pipeline at
-  step 1 like any other delivery and is therefore idempotent by construction.
-  A replay that fails again sets the exception status to `Failed Replay`.
+  missing Channel Listing) and sets the exception to `Resolved`, then triggers
+  replay. Replay re-enters the pipeline at step 1 like any other delivery and is
+  therefore idempotent by construction. **Resolved does not mean imported** —
+  the order counts as imported only when replay succeeds (Order Import Log
+  outcome `Created`). A replay that fails again sets the exception status to
+  `Failed Replay`. Payload data carried by exceptions follows
+  `docs/PRIVACY-REDACTION.md`.
 
 ## 4. Customer policy
 

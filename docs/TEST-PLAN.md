@@ -52,7 +52,8 @@ IDs are stable and referenced from code review.
 | T-IDEM-1 | Importing the same order twice creates exactly one Sales Order; second attempt logs outcome = Duplicate | INV-11A |
 | T-IDEM-2 | Re-processing an order never duplicates Sales Order Items or doubles quantities | INV-11B |
 | T-IDEM-3 | Repeated failure of the same order for the same cause yields exactly one open Integration Exception (dedup_key) | INV-11C |
-| T-IDEM-4 | Replay after fixing the cause (e.g. adding the missing Channel Listing) creates the Sales Order and marks the exception Resolved; replaying again is a no-op | INV-11A, INV-11C |
+| T-IDEM-4 | After a human fixes the cause (e.g. adds the missing Channel Listing) and sets the exception to Resolved, replay creates the Sales Order (log outcome = Created) and the exception remains Resolved; replaying again is a no-op duplicate | INV-11A, INV-11C |
+| T-IDEM-5 | Setting an exception to Ignored requires ignored_reason; an Ignored exception is never replayed automatically | INV-10 |
 
 ### Atomicity (Phases 4–6)
 
@@ -77,6 +78,13 @@ IDs are stable and referenced from code review.
 | T-PIPE-1 | The only public entry point for order creation is the Order Import Service; adapters expose no Frappe-writing functions | INV-9 |
 | T-PIPE-2 | Disabled Channel or imports_enabled = 0 (kill switch) blocks imports, fail closed | INV-9, INV-10 |
 
+### Payload / PII safety (with Integration Exception implementation)
+
+| ID | Test | Invariant |
+|---|---|---|
+| T-PII-1 | An Integration Exception created from an import failure stores no full unredacted payload: raw_payload_redacted and replay_payload_minimal contain only fields on the PRIVACY-REDACTION.md §3 allowlist (unknown payload fields are stripped) | PRIVACY-REDACTION.md, INV-10 |
+| T-PII-2 | Disallowed PII (name, any address part, phone, email, payment data) planted in a synthetic payload appears nowhere in the stored Integration Exception or Order Import Log record, including failure_reason text | PRIVACY-REDACTION.md |
+
 ### Configuration (Phase 5+)
 
 | ID | Test | Invariant |
@@ -90,6 +98,7 @@ IDs are stable and referenced from code review.
 - INV-5: T-FUL-1/2/3 · INV-6: T-FUL-2/3/4 · INV-7: T-STK-2/3
 - INV-8: T-STK-1/2/4 · INV-9: T-PIPE-1/2 · INV-10: T-ATOM-1/2, T-RES-4, T-FUL-2, T-PIPE-2
 - INV-11A: T-IDEM-1/4 · INV-11B: T-IDEM-2 · INV-11C: T-IDEM-3/4
+- PRIVACY-REDACTION.md: T-PII-1/2 (plus T-IDEM-5 for the Ignored-reason rule)
 
 Every invariant has at least one test. Maintaining this section is part of the
 definition of done for any test or invariant change.

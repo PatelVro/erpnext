@@ -76,19 +76,28 @@ The fail-closed landing zone (INV-4, INV-10) and replay anchor.
 | failure_reason | Small Text | Human-readable; never contains secrets |
 | external_identity | Data | For resolution failures |
 | status | Select: **Open / In Review / Resolved / Ignored / Failed Replay** | The complete status set — no other value exists |
+| ignored_reason | Small Text | **Mandatory when status = Ignored**; empty otherwise |
+| resolved_or_ignored_on | Datetime | Set when status becomes terminal; drives the retention purge (PRIVACY-REDACTION.md §5) |
 | dedup_key | Data (unique) | Hash of (channel, channel_order_id, failure_stage, cause) — enforces INV-11C |
 | payload_hash | Data | §9 |
 | raw_payload_redacted | Long Text | §9 |
 | external_payload_reference | Data | §9 |
 | replay_payload_minimal | Long Text | §9 |
 
-Status semantics: `Open` (new, needs triage) → `In Review` (human working it) →
-`Resolved` (cause fixed and replay succeeded) or `Ignored` (deliberate human
-decision to drop). `Failed Replay` marks an attempted replay that failed again
-and returns to triage. If a replay fails for a **different** cause than the
-original exception, the original is set to `Failed Replay` and a new exception
-is created for the new cause (its own dedup_key, per INV-11C), linked back to
-the original.
+Status semantics:
+
+- `Open` — exception created, awaiting triage.
+- `In Review` — someone is investigating or correcting the issue.
+- `Resolved` — the blocking issue was fixed. **The order is not considered
+  imported until a subsequent replay succeeds**; proof of import is the Order
+  Import Log outcome `Created` (and the resulting Sales Order), not this
+  status. After a successful replay the exception remains `Resolved`.
+- `Ignored` — intentionally not imported (e.g. cancelled source order, test
+  payload, confirmed non-actionable duplicate). Requires `ignored_reason`.
+- `Failed Replay` — replay was attempted after resolution but import failed
+  again; returns to triage. If the new failure has a **different** cause than
+  the original, a new exception is created for the new cause (its own
+  dedup_key, per INV-11C), linked back to the original.
 
 ## 6. Custom DocType: Canadian Outlet Settings
 
@@ -143,13 +152,14 @@ Full raw marketplace payloads are **not stored by default**. The model uses:
 
 Scope: this rule governs **stored copies of channel payloads**. It does not
 forbid operational order data required for fulfillment (e.g. the ship-to
-address on a SELF Sales Order), whose handling and retention are part of the
-Phase 1.5 policy.
+address on a SELF Sales Order), whose handling belongs to the customer policy
+(`docs/ORDER-FLOW.md` §4, still open).
 
-**OPEN (Phase 1.5 — blocks Phase 3 implementation of Integration Exception):**
-the exact redaction field list and the retention window for
-`raw_payload_redacted` / `replay_payload_minimal` must be decided and recorded
-here before the DocType is built.
+**DECIDED (Phase 4):** the redaction allowlist, the disallowed-PII list (no
+name, address, phone, email, payment details, or raw blobs in stored copies),
+and the 90-day post-terminal retention window are defined normatively in
+`docs/PRIVACY-REDACTION.md`. That policy gates the Phase 5 implementation of
+Integration Exception and Order Import Log.
 
 ## 10. Naming & conventions
 

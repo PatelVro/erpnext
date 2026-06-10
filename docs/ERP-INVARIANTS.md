@@ -126,8 +126,8 @@ V1 and must not be built opportunistically:
 
 ## Open items (must be resolved before the affected phase)
 
-- **Redaction & retention policy** for external payload data — blocks Integration
-  Exception implementation. See `docs/DATA-MODEL.md` (payload/PII rules) and
-  Phase 1.5.
+- ~~Redaction & retention policy~~ — **decided (Phase 4)**: see
+  `docs/PRIVACY-REDACTION.md` (allowlist redaction, disallowed-PII list, 90-day
+  post-terminal retention). No longer blocks Integration Exception.
 - **Customer creation policy** on import (generic per-channel Customer vs.
   per-buyer Customer records). See `docs/ORDER-FLOW.md`.
