@@ -94,7 +94,10 @@ retention policy (Phase 1.5) must cover the Customer master too.
 
 - **Channels:** WooCommerce only (Phase 6). Amazon and Walmart classification
   rules are already fixed by INV-5 but their adapters arrive in Phase 8.
-- **Transport:** start with polling and/or manual replay. Webhooks may be added
+- **Transport:** manual/operator-triggered import runs and manual replay only.
+  A scheduled polling job is **not** implied by this — scheduled jobs of any
+  kind require their own explicit approval (see ERP-INVARIANTS out-of-scope
+  list), as a separately approved addition within Phase 6. Webhooks may be added
   within Phase 6 only if signature verification and idempotency are demonstrated
   by tests first.
 - **Draft Delivery Note on import:** NOT created in V1 by default. Auto-creating a

@@ -60,6 +60,10 @@ The single external→internal product mapping (INV-2).
 Uniqueness: (channel, external_identity) is unique. One external identity maps to
 exactly one Item per channel. Many listings may point at the same Item.
 
+Enforcement note (INV-11A): order-level idempotency is **enforced** by the unique
+(co_sales_channel, co_channel_order_id) pair on Sales Order (§8); the Order
+Import Log (§7) is the evidence trail, not the enforcement mechanism.
+
 ## 5. Custom DocType: Integration Exception
 
 The fail-closed landing zone (INV-4, INV-10) and replay anchor.
@@ -81,7 +85,10 @@ The fail-closed landing zone (INV-4, INV-10) and replay anchor.
 Status semantics: `Open` (new, needs triage) → `In Review` (human working it) →
 `Resolved` (cause fixed and replay succeeded) or `Ignored` (deliberate human
 decision to drop). `Failed Replay` marks an attempted replay that failed again
-and returns to triage.
+and returns to triage. If a replay fails for a **different** cause than the
+original exception, the original is set to `Failed Replay` and a new exception
+is created for the new cause (its own dedup_key, per INV-11C), linked back to
+the original.
 
 ## 6. Custom DocType: Canadian Outlet Settings
 
@@ -103,7 +110,7 @@ Append-only record of every import attempt (INV-11A evidence trail).
 |---|---|---|
 | channel | Link Channel | |
 | channel_order_id | Data | |
-| import_key | Data (unique) | `channel + channel_order_id` — the INV-11A idempotency key (OPEN — Phase 0 question 8 confirms) |
+| import_key | Data | `channel + channel_order_id` — the INV-11A idempotency key (OPEN — Phase 0 question 8 confirms). **Not unique here**: the log records every attempt, so duplicates and replays produce multiple rows per key |
 | outcome | Select: Created / Duplicate / Exception | |
 | sales_order | Link Sales Order | When outcome = Created |
 | integration_exception | Link Integration Exception | When outcome = Exception |
@@ -133,6 +140,11 @@ Full raw marketplace payloads are **not stored by default**. The model uses:
 - `external_payload_reference` — pointer to retrieve the original from the
   channel itself (order ID / API reference), instead of holding a copy.
 - `replay_payload_minimal` — the minimum fields needed to replay the import.
+
+Scope: this rule governs **stored copies of channel payloads**. It does not
+forbid operational order data required for fulfillment (e.g. the ship-to
+address on a SELF Sales Order), whose handling and retention are part of the
+Phase 1.5 policy.
 
 **OPEN (Phase 1.5 — blocks Phase 3 implementation of Integration Exception):**
 the exact redaction field list and the retention window for
