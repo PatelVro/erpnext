@@ -45,12 +45,18 @@ def reconcile_amazon_settlement(channel, content):
 		status = "Matched" if so else "Unmatched"
 		if so:
 			matched += 1
+		invoice = so and frappe.db.get_value(
+			"Sales Invoice Item", {"sales_order": so.name, "docstatus": 1}, "parent"
+		)
 		rows.append(
 			{
 				"order_id": order_id,
 				"settlement_principal": principal,
 				"sales_order": so.name if so else None,
 				"order_grand_total": so.grand_total if so else None,
+				"sales_invoice": invoice,
+				"outstanding": invoice and frappe.db.get_value(
+					"Sales Invoice", invoice, "outstanding_amount"),
 				"status": status,
 			}
 		)
@@ -61,3 +67,28 @@ def reconcile_amazon_settlement(channel, content):
 		"unmatched": len(rows) - matched,
 		"rows": rows,
 	}
+
+
+@frappe.whitelist()
+def confirm_settlement_payments(channel, content, bank_account=None):
+	"""C9 (FLOW-DECISIONS D9/D10 — reconciliation prioritized early, human
+	confirms postings): for every settlement order matched to a SUBMITTED
+	invoice with an outstanding amount, stage a DRAFT Payment Entry (one open
+	draft per invoice — idempotent; the human reviews and submits each).
+	Writes nothing else; safe-mode and draft-dedup guards live in
+	record_payment_for_invoice."""
+	from canadian_outlet.co_billing.payment_service import record_payment_for_invoice
+
+	reconciliation = reconcile_amazon_settlement(channel, content)
+	drafts, skipped = [], 0
+	for row in reconciliation["rows"]:
+		if row["status"] != "Matched" or not row.get("sales_invoice") or not row.get("outstanding"):
+			skipped += 1
+			continue
+		drafts.append(record_payment_for_invoice(
+			row["sales_invoice"], bank_account=bank_account,
+			reference_no=f"Settlement {row['order_id']}",
+		))
+	reconciliation["payment_drafts"] = drafts
+	reconciliation["skipped_for_payment"] = skipped
+	return reconciliation
