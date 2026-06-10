@@ -165,13 +165,23 @@ def _resolve_customer(channel):
 
 def _create_sales_order(channel, channel_order_id, order, resolved_lines, fulfillment_type, customer):
 	delivery_date = nowdate()
+	currency = order.get("currency")
+	# Channel rates are authoritative (rates come from the marketplace, not a
+	# price list). Pick a selling price list in the order currency when one
+	# exists so ERPNext does not demand a price-list exchange rate; if none
+	# exists the site default applies and a missing exchange rate fails
+	# closed into an Integration Exception (INV-10) for the operator to fix.
+	selling_price_list = currency and frappe.db.get_value(
+		"Price List", {"currency": currency, "selling": 1, "enabled": 1}
+	)
 	doc = frappe.get_doc(
 		{
 			"doctype": "Sales Order",
 			"customer": customer,
 			"transaction_date": nowdate(),
 			"delivery_date": delivery_date,
-			"currency": order.get("currency"),
+			"currency": currency,
+			"selling_price_list": selling_price_list,
 			"co_sales_channel": channel,
 			"co_channel_order_id": channel_order_id,
 			"co_fulfillment_type": fulfillment_type,

@@ -84,12 +84,17 @@ def make_rule(channel, evidence_key, evidence_value, fulfillment_type):
 	).insert()
 
 
+def company_currency(company=TEST_COMPANY):
+	return frappe.get_cached_value("Company", company, "default_currency")
+
+
 def default_currency():
-	# The test site's company currency (ERPNext's test bootstrap uses INR);
-	# synthetic orders must match it or every Sales Order insert fails on
-	# missing exchange rates. Production channels send real currencies and
-	# the company is CAD — currency handling is finalized with Phase 0 Q9.
-	return frappe.get_cached_value("Company", TEST_COMPANY, "default_currency")
+	# The import service creates Sales Orders against the site's default
+	# company, so synthetic orders must use THAT company's currency or the
+	# insert fails on missing exchange rates. Production channels send real
+	# currencies and the company is CAD — finalized with Phase 0 Q9.
+	default_company = frappe.defaults.get_global_default("company")
+	return frappe.get_cached_value("Company", default_company, "default_currency")
 
 
 def make_order(channel, channel_order_id, lines=None, evidence=None, **overrides):

@@ -45,7 +45,7 @@ class TestStockSafety(FrappeTestCase):
 			warehouse=utils.TEST_WAREHOUSE,
 			qty=qty,
 			rate=10,
-			currency=utils.default_currency(),
+			currency=utils.company_currency(),  # helper defaults to _Test Company
 			do_not_submit=True,
 		)
 
@@ -63,8 +63,13 @@ class TestStockSafety(FrappeTestCase):
 		entries = _stock_ledger_entries("Delivery Note", dn.name)
 		self.assertEqual(len(entries), 1)
 		self.assertEqual(entries[0].actual_qty, -2)
-		# A submitted document cannot submit twice (exactly-once by model).
-		self.assertRaises(Exception, dn.submit)
+		# Exactly-once: a repeat submit attempt must not produce a second
+		# ledger entry, whether it raises or no-ops.
+		try:
+			frappe.get_doc("Delivery Note", dn.name).submit()
+		except Exception:
+			pass
+		self.assertEqual(len(_stock_ledger_entries("Delivery Note", dn.name)), 1)
 
 	def test_t_stk_3_fba_import_creates_no_stock_documents(self):
 		# T-STK-3 (INV-7): FBA/WFS orders never touch local stock.
