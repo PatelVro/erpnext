@@ -1,0 +1,99 @@
+{
+ "actions": [],
+ "autoname": "format:CO-OIL-{#####}",
+ "creation": "2026-06-10 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "channel",
+  "channel_order_id",
+  "import_key",
+  "outcome",
+  "sales_order",
+  "integration_exception",
+  "payload_hash"
+ ],
+ "fields": [
+  {
+   "fieldname": "channel",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Channel",
+   "options": "Channel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "channel_order_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Channel Order ID",
+   "reqd": 1
+  },
+  {
+   "description": "channel + channel_order_id (INV-11A key). Not unique: the log records every attempt; enforcement lives on Sales Order (docs/DATA-MODEL.md \u00a74/\u00a77).",
+   "fieldname": "import_key",
+   "fieldtype": "Data",
+   "label": "Import Key",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "outcome",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Outcome",
+   "options": "Created\nDuplicate\nException",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "integration_exception",
+   "fieldtype": "Link",
+   "label": "Integration Exception",
+   "options": "Integration Exception"
+  },
+  {
+   "description": "Hash only \u2014 the log stores no payload copies (docs/PRIVACY-REDACTION.md \u00a75).",
+   "fieldname": "payload_hash",
+   "fieldtype": "Data",
+   "label": "Payload Hash"
+  }
+ ],
+ "links": [],
+ "modified": "2026-06-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Canadian Outlet",
+ "name": "Order Import Log",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Canadian Outlet Operations",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

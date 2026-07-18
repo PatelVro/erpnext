@@ -1,0 +1,127 @@
+{
+ "actions": [],
+ "autoname": "format:CO-SSE-{#####}",
+ "creation": "2026-06-10 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "channel",
+  "channel_order_id",
+  "sales_order",
+  "carrier",
+  "carrier_status",
+  "tracking_number",
+  "event_timestamp",
+  "source",
+  "event_hash",
+  "shipment_items",
+  "delivery_note"
+ ],
+ "fields": [
+  {
+   "fieldname": "channel",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Channel",
+   "options": "Channel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "channel_order_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Channel Order ID",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Resolved via (co_sales_channel, co_channel_order_id); empty when no matching order exists. Recording an event NEVER touches stock or document status (INV-8, docs/STOCK-FLOW.md \u00a74).",
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "carrier",
+   "fieldtype": "Data",
+   "label": "Carrier"
+  },
+  {
+   "fieldname": "carrier_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Carrier Status",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tracking_number",
+   "fieldtype": "Data",
+   "label": "Tracking Number"
+  },
+  {
+   "fieldname": "event_timestamp",
+   "fieldtype": "Data",
+   "label": "Event Timestamp"
+  },
+  {
+   "default": "ShipStation",
+   "fieldname": "source",
+   "fieldtype": "Data",
+   "label": "Source"
+  },
+  {
+   "description": "Duplicate events are idempotent on this hash (docs/DATA-MODEL.md \u00a77A).",
+   "fieldname": "event_hash",
+   "fieldtype": "Data",
+   "label": "Event Hash",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "JSON [{sku, qty}] from the source shipment \u2014 sku+qty only (PRIVACY-REDACTION \u00a74). Drives the per-shipment deduction (C2).",
+   "fieldname": "shipment_items",
+   "fieldtype": "Code",
+   "label": "Shipment Items"
+  },
+  {
+   "description": "Set when this event was converted into a deduction (C2); conversion is idempotent on this link.",
+   "fieldname": "delivery_note",
+   "fieldtype": "Link",
+   "label": "Delivery Note",
+   "options": "Delivery Note",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-06-10 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Canadian Outlet",
+ "name": "Shipment Status Event",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Canadian Outlet Operations",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
